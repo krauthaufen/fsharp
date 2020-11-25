@@ -33,9 +33,9 @@ type ResultTests() =
 
     let toUpper (v:string) = v.ToUpper()
 
-    let shouldBeOkWithValue expected maybeOk = match maybeOk with | Error e-> failwith "Expected Ok, got Error!" | Ok v->Assert.AreEqual(expected, v)
+    let shouldBeOkWithValue expected maybeOk = match maybeOk with | Error _ -> failwith "Expected Ok, got Error!" | Ok v->Assert.AreEqual(expected, v)
 
-    let shouldBeErrorWithValue expected maybeError = match maybeError with | Error e-> Assert.AreEqual(expected, e) | Ok v-> failwith "Expected Error, got Ok!"
+    let shouldBeErrorWithValue expected maybeError = match maybeError with | Error e-> Assert.AreEqual(expected, e) | Ok _ -> failwith "Expected Error, got Ok!"
 
     let addOneOk (v:int) = Ok (v+1)
 

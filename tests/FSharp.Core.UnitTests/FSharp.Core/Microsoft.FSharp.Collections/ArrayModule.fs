@@ -303,7 +303,7 @@ type ArrayModule() =
         
     [<Fact>]
     member this.takeWhile() =
-        Assert.AreEqual([||],Array.takeWhile (fun x -> failwith "should not be used") [||])
+        Assert.AreEqual([||],Array.takeWhile (fun _ -> failwith "should not be used") [||])
         Assert.AreEqual([|1;2;4;5|],Array.takeWhile (fun x -> x < 6) [|1;2;4;5;6;7|])
         Assert.AreEqual([|"a"; "ab"; "abc"|],Array.takeWhile (fun (x:string) -> x.Length < 4) [|"a"; "ab"; "abc"; "abcd"; "abcde"|])
         Assert.AreEqual([|"a"; "ab"; "abc"; "abcd"; "abcde"|],Array.takeWhile (fun _ -> true) [|"a"; "ab"; "abc"; "abcd"; "abcde"|])
@@ -482,9 +482,9 @@ type ArrayModule() =
         Assert.AreEqual(-1,Array.compareWith compare [|1;2;2|] [|1;2;3;4|])
 
         // compareWith should use the comparer
-        Assert.AreEqual(0,Array.compareWith (fun x y -> 0) [|"1";"2"|] [|"1";"3"|])
-        Assert.AreEqual(1,Array.compareWith (fun x y -> 1) [|"1";"2"|] [|"1";"3"|])
-        Assert.AreEqual(-1,Array.compareWith (fun x y -> -1) [|"1";"2"|] [|"1";"3"|])
+        Assert.AreEqual(0,Array.compareWith (fun _ _ -> 0) [|"1";"2"|] [|"1";"3"|])
+        Assert.AreEqual(1,Array.compareWith (fun _ _ -> 1) [|"1";"2"|] [|"1";"3"|])
+        Assert.AreEqual(-1,Array.compareWith (fun _ _ -> -1) [|"1";"2"|] [|"1";"3"|])
         
     [<Fact>]
     member this.Concat() =
@@ -915,7 +915,7 @@ type ArrayModule() =
         Assert.AreEqual("3", resultInt)
         
         // make it not found
-        CheckThrowsKeyNotFoundException (fun () -> Array.pick (fun n -> None) intArr |> ignore)
+        CheckThrowsKeyNotFoundException (fun () -> Array.pick (fun _ -> None) intArr |> ignore)
 
     [<Fact>]
     member this.last() =
@@ -1112,7 +1112,7 @@ type ArrayModule() =
 
         // null array
         let nullArr = null:string[] 
-        CheckThrowsArgumentNullException (fun () -> Array.forall (fun x -> true) nullArr |> ignore)  
+        CheckThrowsArgumentNullException (fun () -> Array.forall (fun _ -> true) nullArr |> ignore)  
         
         ()
         
@@ -1133,8 +1133,8 @@ type ArrayModule() =
         // null array
         let nullArr = null:string[]
         let validArray = [| "a" |] 
-        CheckThrowsArgumentNullException (fun () -> Array.forall2 (fun x y-> true) nullArr validArray |> ignore)  
-        CheckThrowsArgumentNullException (fun () -> Array.forall2 (fun x y-> true) validArray nullArr |> ignore)  
+        CheckThrowsArgumentNullException (fun () -> Array.forall2 (fun _ _ -> true) nullArr validArray |> ignore)  
+        CheckThrowsArgumentNullException (fun () -> Array.forall2 (fun _ _ -> true) validArray nullArr |> ignore)  
         
         // len1 <> len2
         CheckThrowsArgumentException(fun () -> Array.forall2 (fun x y -> x < y) [|1..10|] [|2..20|] |> ignore)
@@ -1229,7 +1229,6 @@ type ArrayModule() =
 
         // Empty array
         let emptyArray = [||]
-        let group_byEmpty = Array.groupBy funcInt emptyArray
         let expectedEmptyArray = [||]
 
         if emptyArray <> expectedEmptyArray then Assert.Fail()

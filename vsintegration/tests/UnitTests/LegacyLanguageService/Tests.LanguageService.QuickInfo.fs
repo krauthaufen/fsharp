@@ -28,7 +28,7 @@ type UsingMSBuild() =
     
     let stopWatch = new System.Diagnostics.Stopwatch()
     let ResetStopWatch() = stopWatch.Reset(); stopWatch.Start()
-    let time1 op a message = 
+    let time1 op a _ = 
         ResetStopWatch()
         let result = op a
         //printf "%s %d ms\n" message stopWatch.ElapsedMilliseconds
@@ -110,10 +110,10 @@ type UsingMSBuild() =
         AssertIdentifierInToolTipExactlyOnce(ident, tooltip)
         gpatcc.AssertExactly(0,0)
 
-    member this.VerifyOrderOfNestedTypesInQuickInfo (source : string, marker : string, expectedExactOrder : string list, ?extraRefs : string list) = 
+    member this.VerifyOrderOfNestedTypesInQuickInfo (source : string, expectedExactOrder : string list, ?extraRefs : string list) = 
         let (_, _, file) = this.CreateSingleFileProject(source, ?references = extraRefs)
         
-        let gpatcc = GlobalParseAndTypeCheckCounter.StartNew(this.VS)
+        let _ = GlobalParseAndTypeCheckCounter.StartNew(this.VS)
         MoveCursorToStartOfMarker(file, "(*M*)")
         let tooltip = time1 GetQuickInfoAtCursor file "Time of first tooltip"
         AssertContainsInOrder(tooltip, expectedExactOrder)
@@ -122,7 +122,6 @@ type UsingMSBuild() =
     member public this.``NestedTypesOrder``() = 
         this.VerifyOrderOfNestedTypesInQuickInfo(
             source = "type t = System.Runtime.CompilerServices.RuntimeHelpers(*M*)",
-            marker = "(*M*)",
             expectedExactOrder = ["GetHashCode"; "GetObjectValue"]
             )
     
@@ -283,7 +282,6 @@ Full name: Microsoft.FSharp.Control.Async""".TrimStart().Replace("\r\n", "\n")
         let tpReference = PathRelativeToTestAssembly( @"DummyProviderForLanguageServiceTesting.dll")
         this.VerifyOrderOfNestedTypesInQuickInfo(
             source = code,
-            marker = "(*M*)",
             expectedExactOrder = ["A"; "X"; "Z"],
             extraRefs = [tpReference]
             ) 
@@ -1038,7 +1036,7 @@ let f (tp:ITypeProvider(*$$$*)) = tp.Invalidate
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let projectLib = CreateProject(solution,"testlib")
-        let file = AddFileFromText(projectLib,"MyLibrary.fs", 
+        let _ = AddFileFromText(projectLib,"MyLibrary.fs", 
                       [ "module MyLibrary"
                         "let x = 1"
                         "module Nested ="
@@ -1047,7 +1045,7 @@ let f (tp:ITypeProvider(*$$$*)) = tp.Invalidate
                         "        let z = 3"
                       ])
         let project = CreateProject(solution,"testapp")
-        let file = AddFileFromText(project,"App.fs", 
+        let _ = AddFileFromText(project,"App.fs", 
                       [ "let a = MyLibrary.Nested.Deeper.z" ])
         SetConfigurationAndPlatform(project, "Debug|AnyCPU")  // we must set config/platform when building with ProjectReferences
         SetConfigurationAndPlatform(projectLib, "Debug|AnyCPU")  // we must set config/platform when building with ProjectReferences
@@ -1174,14 +1172,14 @@ let f (tp:ITypeProvider(*$$$*)) = tp.Invalidate
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["#light"
                                      "type Bob() = "
                                      "    let x = 1"])
-        let file2 = AddFileFromText(project,"File2.fs",
+        let _ = AddFileFromText(project,"File2.fs",
                                     ["#light"
                                      "let bob = new File1.Bob()"])
-        let file1 = OpenFile(project,"File1.fs")
+        let _ = OpenFile(project,"File1.fs")
         let file2 = OpenFile(project,"File2.fs")
         
         // Get the tooltip at type Bob        
@@ -1202,14 +1200,14 @@ let f (tp:ITypeProvider(*$$$*)) = tp.Invalidate
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let file1 = AddLinkedFileFromTextEx(project, @"..\LINK.FS", @"..\link.fs", @"MyLink.fs",
+        let _ = AddLinkedFileFromTextEx(project, @"..\LINK.FS", @"..\link.fs", @"MyLink.fs",
                                     ["#light"
                                      "type Bob() = "
                                      "    let x = 1"])
-        let file2 = AddFileFromText(project,"File2.fs",
+        let _ = AddFileFromText(project,"File2.fs",
                                     ["#light"
                                      "let bob = new Link.Bob()"])
-        let file1 = OpenFile(project, @"..\link.fs")
+        let _ = OpenFile(project, @"..\link.fs")
         let file2 = OpenFile(project, @"File2.fs")
         
         // Get the tooltip at type Bob        
@@ -1593,13 +1591,13 @@ let f (tp:ITypeProvider(*$$$*)) = tp.Invalidate
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project1 = CreateProject(solution,"testproject1")
-        let file1 = AddFileFromText(project1,"File1.fs",
+        let _ = AddFileFromText(project1,"File1.fs",
                                     ["#light"
                                      "type (*bob*)Bob1() = "
                                      "    let x = 1"])
         let file1 = OpenFile(project1,"File1.fs")
         let project2 = CreateProject(solution,"testproject2")
-        let file2 = AddFileFromText(project2,"File2.fs",
+        let _ = AddFileFromText(project2,"File2.fs",
                                     ["#light"
                                      "type (*bob*)Bob2() = "
                                      "    let x = 1"])
@@ -1623,14 +1621,14 @@ let f (tp:ITypeProvider(*$$$*)) = tp.Invalidate
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["#light"
                                      "type Bob() = "
                                      "    let x = 1"])
-        let file2 = AddFileFromText(project,"..\\File2.fs",
+        let _ = AddFileFromText(project,"..\\File2.fs",
                                     ["#light"
                                      "let bob = new File1.Bob()"])
-        let file1 = OpenFile(project,"File1.fs")
+        let _ = OpenFile(project,"File1.fs")
         let file2 = OpenFile(project,"..\\File2.fs")
         
         // Get the tooltip at type Bob     
@@ -3010,18 +3008,18 @@ query."
                             type ControlEventHandler = delegate of int -> unit"""
         let file2 =
             if (crossProject = true) then
-                let file1 = AddFileFromTextBlob(project,"File1.fs",testLibCode)
+                let _ = AddFileFromTextBlob(project,"File1.fs",testLibCode)
                 let project2 = CreateProject(solution,"codeProject")
-                let file2 = AddFileFromTextBlob(project2,"File2.fs",fileContent)
+                let _ = AddFileFromTextBlob(project2,"File2.fs",fileContent)
                 Build(project).BuildSucceeded |> ignore
                 AddProjectReference(project2, project)
-                let file1 = OpenFile(project,"File1.fs")
+                let _ = OpenFile(project,"File1.fs")
                 let file2 = OpenFile(project2,"File2.fs")
                 file2
             else
-                let file1 = AddFileFromTextBlob(project,"File1.fs",testLibCode)
-                let file2 = AddFileFromTextBlob(project,"File2.fs",fileContent)
-                let file1 = OpenFile(project,"File1.fs")
+                let _ = AddFileFromTextBlob(project,"File1.fs",testLibCode)
+                let _ = AddFileFromTextBlob(project,"File2.fs",fileContent)
+                let _ = OpenFile(project,"File1.fs")
                 let file2 = OpenFile(project,"File2.fs")
                 file2
         //Build(project).BuildSucceeded |> printf "%b"
@@ -3196,10 +3194,10 @@ query."
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
         this.AddAssemblyReference(project, "System.Xml.Linq")
-        let file1 = AddFileFromTextBlob(project,"File1.fs",datacode)
+        let _ = AddFileFromTextBlob(project,"File1.fs",datacode)
         //build
-        let file2 = AddFileFromTextBlob(project,"File2.fs",code)
-        let file1 = OpenFile(project,"File1.fs")
+        let _ = AddFileFromTextBlob(project,"File2.fs",code)
+        let _ = OpenFile(project,"File1.fs")
         let file2 = OpenFile(project,"File2.fs")
         
         let gpatcc = GlobalParseAndTypeCheckCounter.StartNew(this.VS)

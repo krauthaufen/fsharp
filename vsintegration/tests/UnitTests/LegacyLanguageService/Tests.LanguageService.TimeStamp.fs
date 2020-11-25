@@ -57,12 +57,12 @@ type UsingMSBuild()  =
         let project2 = CreateProject(solution,"testproject2")                
         SetConfigurationAndPlatform(project1, "Debug|AnyCPU")  // maybe due to msbuild bug on dev10, we must set config/platform when building with ProjectReferences
         SetConfigurationAndPlatform(project2, "Debug|AnyCPU")  // maybe due to msbuild bug on dev10, we must set config/platform when building with ProjectReferences
-        let file1 = AddFileFromText(project1,"File1.fs", ["#light"
-                                                          "let xx = 42"
-                                                          "printfn \"hi\""])
-        let file2 = AddFileFromText(project2,"File2.fs", ["#light"
-                                                          "let yy = File1.xx"
-                                                          "printfn \"hi\""])      
+        let _ = AddFileFromText(project1,"File1.fs", ["#light"
+                                                      "let xx = 42"
+                                                      "printfn \"hi\""])
+        let _ = AddFileFromText(project2,"File2.fs", ["#light"
+                                                      "let yy = File1.xx"
+                                                      "printfn \"hi\""])      
         // Add a project-to-project reference.
         // WARNING: See bug 4434 - when unit testing this actually goes and builds project1!!!!
         AddProjectReference(project2,project1)
@@ -76,8 +76,8 @@ type UsingMSBuild()  =
         TakeCoffeeBreak(this.VS) 
         
         // Open files in editor.
-        let file1 = OpenFile(project1,"File1.fs")
-        let file2 = OpenFile(project2,"File2.fs")
+        let _ = OpenFile(project1,"File1.fs")
+        let _ = OpenFile(project2,"File2.fs")
 
         // Now clean project1
         printfn "cleaning dependent project..."
@@ -98,16 +98,16 @@ type UsingMSBuild()  =
         let project2 = CreateProject(solution,"testproject2")    
         SetConfigurationAndPlatform(project1, "Debug|AnyCPU")  // maybe due to msbuild bug on dev10, we must set config/platform when building with ProjectReferences
         SetConfigurationAndPlatform(project2, "Debug|AnyCPU")  // maybe due to msbuild bug on dev10, we must set config/platform when building with ProjectReferences
-        let file1 = AddFileFromText(project1,"File1.fs", ["#light"])
-        let file2 = AddFileFromText(project2,"File2.fs", ["#light"])
+        let _ = AddFileFromText(project1,"File1.fs", ["#light"])
+        let _ = AddFileFromText(project2,"File2.fs", ["#light"])
         
         // Add a project-to-project reference. 
         // WARNING: See bug 4434 - when unit testing this actually goes and builds project1!!!!
         AddProjectReference(project2,project1)
         
         // Open files in editor.
-        let file1 = OpenFile(project1,"File1.fs")
-        let file2 = OpenFile(project2,"File2.fs")
+        let _ = OpenFile(project1,"File1.fs")
+        let _ = OpenFile(project2,"File2.fs")
         
         // Wait for things to settle down and make sure there is an error
         TakeCoffeeBreak(this.VS) 
@@ -130,26 +130,26 @@ type UsingMSBuild()  =
         // Create the projects/
         let project1 = CreateProject(solution,"testproject1")
         let project2 = CreateProject(solution,"testproject2")                
-        let file1 = AddFileFromText(project1,"File1.fs", ["#light"
-                                                          "let xx = 42"
-                                                          "printfn \"hi\""])
-        let file2 = AddFileFromText(project2,"File2.fs", ["#light"
-                                                          "let yy = File1.xx"
-                                                          "printfn \"hi\""])
+        let _ = AddFileFromText(project1,"File1.fs", ["#light"
+                                                      "let xx = 42"
+                                                      "printfn \"hi\""])
+        let _ = AddFileFromText(project2,"File2.fs", ["#light"
+                                                      "let yy = File1.xx"
+                                                      "printfn \"hi\""])
         
         // Add an assembly reference between the projects (a P2P would fall victim to 4434)
         let p1exe = BuildTarget(project1, "Clean")  // just a handy way to get the filename of the exe that would be built
         this.AddAssemblyReference(project2, p1exe.ExecutableOutput)
 
         // open a file to see the errors
-        let file2 = OpenFile(project2,"File2.fs")
+        let _ = OpenFile(project2,"File2.fs")
         TakeCoffeeBreak(this.VS)
         
         let errs = GetErrors(project2)
         Assert.IsTrue(List.length errs > 0, "There should be errors (unresolved reference)")
 
         // switch focus to a different file (to turn off 'focus' idle processing for file2)
-        let file1 = OpenFile(project1,"File1.fs")
+        let _ = OpenFile(project1,"File1.fs")
 
         // Now build project1
         printfn "building dependent project..."
@@ -171,12 +171,12 @@ type UsingMSBuild()  =
         let solution = this.CreateSolution()
         let project1 = CreateProject(solution,"testproject1")
         
-        let file1 = AddFileFromText(project1,"File1.fs",
+        let _ = AddFileFromText(project1,"File1.fs",
                                     ["#light"]
                                      )
         let file1 = OpenFile(project1,"File1.fs")
         let project2 = CreateProject(solution,"testproject2")
-        let file2 = AddFileFromText(project2,"File2.fs",
+        let _ = AddFileFromText(project2,"File2.fs",
                                     ["#light"
                                      "File1.File1."
                                      "()"])
@@ -218,18 +218,18 @@ type UsingMSBuild()  =
         let solution = this.CreateSolution()
         let project1 = CreateProject(solution,"testproject1")
 
-        let MakeRelativePath(path1:string, path2) =
+        let MakeRelativePath(path1:string, _) =
             // Pretend to return a path to path1 relative to path2.
             let temp = (System.IO.Path.GetTempPath())
             let tempLen = temp.Length
             ".."+(path1.Substring(tempLen-1))
 
-        let file1 = AddFileFromText(project1,"File1.fs",
+        let _ = AddFileFromText(project1,"File1.fs",
                                     ["#light"]
                                      )
         let file1 = OpenFile(project1,"File1.fs")
         let project2 = CreateProject(solution,"testproject2")
-        let file2 = AddFileFromText(project2,"File2.fs",
+        let _ = AddFileFromText(project2,"File2.fs",
                                     ["#light"
                                      "File1.File1."
                                      "()"])
@@ -273,12 +273,12 @@ type UsingMSBuild()  =
         let solution = this.CreateSolution()
         let project1 = CreateProject(solution,"testproject1")
         
-        let file1 = AddFileFromText(project1,"File1.fs",
+        let _ = AddFileFromText(project1,"File1.fs",
                                     ["#light"]
                                      )
         let file1 = OpenFile(project1,"File1.fs")
         let project2 = CreateProject(solution,"testproject2")
-        let file2 = AddFileFromText(project2,"File2.fs",
+        let _ = AddFileFromText(project2,"File2.fs",
                                     ["#light"
                                      "File1.File1."
                                      "()"])

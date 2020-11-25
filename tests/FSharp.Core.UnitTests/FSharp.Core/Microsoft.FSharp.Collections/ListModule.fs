@@ -22,11 +22,7 @@ type ListModule() =
     member this.Empty() =
         let emptyList = List.empty
         let resultEpt = List.length emptyList
-        Assert.AreEqual(0, resultEpt)   
-        
-        let c : int list   = List.empty<int>
-        let d : string list = List.empty<string>
-        
+        Assert.AreEqual(0, resultEpt)        
         ()
 
     [<Fact>]
@@ -241,7 +237,7 @@ type ListModule() =
         
         // always None 
         let emptySrc :int list = [ ]
-        let emptyChosen = List.choose (fun i -> Option<int>.None) intSrc        
+        let emptyChosen = List.choose (fun _ -> Option<int>.None) intSrc        
         Assert.AreEqual(emptySrc, emptyChosen)
 
         // empty List
@@ -268,13 +264,13 @@ type ListModule() =
         Assert.AreEqual(-1,List.compareWith compare [1;2;2] [1;2;3;4])
 
         // compareWith should use the comparer
-        Assert.AreEqual(0,List.compareWith (fun x y -> 0) ["1";"2"] ["1";"3"])
-        Assert.AreEqual(1,List.compareWith (fun x y -> 1) ["1";"2"] ["1";"3"])
-        Assert.AreEqual(-1,List.compareWith (fun x y -> -1) ["1";"2"] ["1";"3"])
+        Assert.AreEqual(0,List.compareWith (fun _ _ -> 0) ["1";"2"] ["1";"3"])
+        Assert.AreEqual(1,List.compareWith (fun _ _ -> 1) ["1";"2"] ["1";"3"])
+        Assert.AreEqual(-1,List.compareWith (fun _ _ -> -1) ["1";"2"] ["1";"3"])
         
     [<Fact>]
     member this.takeWhile() =
-        Assert.AreEqual(([] : int list),List.takeWhile (fun x -> failwith "should not be used") ([] : int list))
+        Assert.AreEqual(([] : int list),List.takeWhile (fun _ -> failwith "should not be used") ([] : int list))
         Assert.AreEqual([1;2;4;5],List.takeWhile (fun x -> x < 6) [1;2;4;5;6;7])
         Assert.AreEqual(["a"; "ab"; "abc"],List.takeWhile (fun (x:string) -> x.Length < 4) ["a"; "ab"; "abc"; "abcd"; "abcde"])        
         Assert.AreEqual(["a"; "ab"; "abc"; "abcd"; "abcde"],List.takeWhile (fun _ -> true) ["a"; "ab"; "abc"; "abcd"; "abcde"])
@@ -707,7 +703,7 @@ type ListModule() =
         ()
         
         //unequal length list
-        let funcUnequal x y () = ()
+        let funcUnequal _ _ () = ()
         CheckThrowsArgumentException( fun () -> (List.foldBack2 funcUnequal  [ 1..10 ]  [1..9] ()))
 
         ()

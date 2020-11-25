@@ -94,20 +94,20 @@ type Array2Module() =
                     let arg = (System.Math.PI / 10.0) * float j 
                     if i = 0 then System.Math.Sin(arg) else System.Math.Cos(arg))
         let intArr2 = Array2D.create 2 3 8.8
-        let resultInt = Array2D.blit intArr 0 0 intArr2 0 0 2 2
+        Array2D.blit intArr 0 0 intArr2 0 0 2 2
         if intArr2.[1,1] <> 0.95105651629515353 then Assert.Fail()
 
         
         // string array 
         let strArr = Array2D.init 2 3 (fun i j -> i.ToString() + "-" + j.ToString())
         let strArr2 = Array2D.create 2 3 ""    
-        let resultStr = Array2D.blit strArr 0 0 strArr2 0 0 2 3
+        Array2D.blit strArr 0 0 strArr2 0 0 2 3
         if strArr2.[1,1] <> "1-1" then Assert.Fail()
         
         // empty array     
         let eptArr = Array2D.create 0 0 1
         let eptArr2 = Array2D.create 0 0 1
-        let resultEpt = Array2D.blit eptArr 0 0 eptArr2 0 0 0 0 
+        Array2D.blit eptArr 0 0 eptArr2 0 0 0 0 
         if eptArr2   <> eptArr  then Assert.Fail()
 
         // null array
@@ -211,13 +211,13 @@ type Array2Module() =
     [<Fact>]
     member this.Create() =
         // integer array  
-        let intArr = Array2D.init 2 3 (fun i j -> 100)
+        let intArr = Array2D.init 2 3 (fun _ _ -> 100)
         let resultInt = Array2D.create 2 3 100 
         if resultInt <> intArr then Assert.Fail()
 
         
         // string array 
-        let strArr = Array2D.init 2 3 (fun i j -> "goodboy")
+        let strArr = Array2D.init 2 3 (fun _ _ -> "goodboy")
         let resultStr = Array2D.create 2 3 "goodboy"
         if resultStr <> strArr then Assert.Fail()
         
@@ -416,7 +416,7 @@ type Array2Module() =
 
         
         // string array 
-        let strArr = Array2D.init 2 3 (fun i j -> "goodboy")
+        let strArr = Array2D.init 2 3 (fun _ _ -> "goodboy")
         let funStr (x:string) = x.ToUpper()
         let resultStr = Array2D.map funStr strArr
         if resultStr <> Array2D.create 2 3 "GOODBOY" then Assert.Fail()
@@ -442,7 +442,7 @@ type Array2Module() =
 
         
         // string array 
-        let strArr = Array2D.init 2 3 (fun i j -> "goodboy")
+        let strArr = Array2D.init 2 3 (fun _ _ -> "goodboy")
         let funStr (x:int) (y:int) (z:string) = x.ToString() + y.ToString() + z.ToUpper()
         let resultStr = Array2D.mapi funStr strArr
         if resultStr <> Array2D.init 2 3 (fun i j -> i.ToString() + j.ToString() + "GOODBOY")  then Assert.Fail()
@@ -555,11 +555,6 @@ type Array2Module() =
         if m6lislis <> m6arrarr then Assert.Fail()
         if m6lislis <> m6arrlis then Assert.Fail()
         if m6lislis <> m6lisarr then Assert.Fail()
-        
-        let m7 = array2D [for i in 0..1000 do
-                            yield [for j in 0..1000 do
-                                       yield i*j] ]
-
 
         let matrix :int[,] = array2D [[1;2;3]; 
                                       [2;3;4]]

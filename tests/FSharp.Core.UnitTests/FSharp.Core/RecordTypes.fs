@@ -349,7 +349,6 @@ let [<Fact>] ``inline constraints resolve correctly`` () =
             Third   = 100.32M
             Fourth  = 0xbaad4 }
 
-    let v3 = CX_set_First (m,1)
     Assert.AreEqual (1, m.First)
 
 let [<Fact>] ``member setters resolve correctly`` () =

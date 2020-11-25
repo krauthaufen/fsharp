@@ -320,7 +320,7 @@ let ``Test project1 xxx symbols`` () =
 
 
     let wholeProjectResults = checker.ParseAndCheckProject(Project1.options) |> Async.RunSynchronously
-    let backgroundParseResults1, backgroundTypedParse1 = 
+    let _, backgroundTypedParse1 = 
         checker.GetBackgroundCheckResultsForFileInProject(Project1.fileName1, Project1.options) 
         |> Async.RunSynchronously
 
@@ -593,20 +593,11 @@ let ``Test file explicit parse symbols`` () =
 
 
 [<Test>]
-let ``Test file explicit parse all symbols`` () = 
-
-
-    let wholeProjectResults = checker.ParseAndCheckProject(Project1.options) |> Async.RunSynchronously
+let ``Test file explicit parse all symbols`` () =
     let parseResults1 = checker.ParseFile(Project1.fileName1, Project1.fileSource1, Project1.parsingOptions) |> Async.RunSynchronously
-    let parseResults2 = checker.ParseFile(Project1.fileName2, Project1.fileSource2, Project1.parsingOptions) |> Async.RunSynchronously
 
     let checkResults1 = 
         checker.CheckFileInProject(parseResults1, Project1.fileName1, 0, Project1.fileSource1, Project1.options) 
-        |> Async.RunSynchronously
-        |> function FSharpCheckFileAnswer.Succeeded x ->  x | _ -> failwith "unexpected aborted"
-
-    let checkResults2 = 
-        checker.CheckFileInProject(parseResults2, Project1.fileName2, 0, Project1.fileSource2, Project1.options)
         |> Async.RunSynchronously
         |> function FSharpCheckFileAnswer.Succeeded x ->  x | _ -> failwith "unexpected aborted"
 
@@ -1345,7 +1336,7 @@ let ``Test project4 all uses of all signature symbols`` () =
 let ``Test project4 T symbols`` () = 
 
     let wholeProjectResults = checker.ParseAndCheckProject(Project4.options) |> Async.RunSynchronously
-    let backgroundParseResults1, backgroundTypedParse1 = 
+    let _, backgroundTypedParse1 = 
         checker.GetBackgroundCheckResultsForFileInProject(Project4.fileName1, Project4.options) 
         |> Async.RunSynchronously
 
@@ -1540,7 +1531,7 @@ let ``Test project 5 all symbols`` () =
 let ``Test complete active patterns' exact ranges from uses of symbols`` () =
 
     let wholeProjectResults = checker.ParseAndCheckProject(Project5.options) |> Async.RunSynchronously
-    let backgroundParseResults1, backgroundTypedParse1 = 
+    let _, backgroundTypedParse1 = 
         checker.GetBackgroundCheckResultsForFileInProject(Project5.fileName1, Project5.options) 
         |> Async.RunSynchronously
 
@@ -1600,7 +1591,7 @@ let ``Test complete active patterns' exact ranges from uses of symbols`` () =
 let ``Test partial active patterns' exact ranges from uses of symbols`` () =
 
     let wholeProjectResults = checker.ParseAndCheckProject(Project5.options) |> Async.RunSynchronously
-    let backgroundParseResults1, backgroundTypedParse1 = 
+    let _, backgroundTypedParse1 = 
         checker.GetBackgroundCheckResultsForFileInProject(Project5.fileName1, Project5.options) 
         |> Async.RunSynchronously    
 
@@ -1730,12 +1721,6 @@ let ``Test project7 whole project errors`` () =
 let ``Test project 7 all symbols`` () =
 
     let wholeProjectResults = checker.ParseAndCheckProject(Project7.options) |> Async.RunSynchronously
-
-    let allUsesOfAllSymbols = 
-        wholeProjectResults.GetAllUsesOfAllSymbols()
-       
-        |> Array.map (fun su -> su.Symbol.ToString(), su.Symbol.DisplayName, Project7.cleanFileName su.FileName, tups su.RangeAlternate)
-
     let arg1symbol = 
         wholeProjectResults.GetAllUsesOfAllSymbols() 
        
@@ -1972,7 +1957,7 @@ let ``Test Project10 all symbols`` () =
             ("parameter query", "query", "file1", ((7, 18), (7, 23)), []);
             ("NamedArgs", "NamedArgs", "file1", ((2, 7), (2, 16)), ["module"])|]
 
-    let backgroundParseResults1, backgroundTypedParse1 = 
+    let _, backgroundTypedParse1 = 
         checker.GetBackgroundCheckResultsForFileInProject(Project10.fileName1, Project10.options) 
         |> Async.RunSynchronously
 
@@ -2604,7 +2589,7 @@ let ``Test Project16 sig symbols are equal to impl symbols`` () =
 
             match ok with 
             | [] -> failwith (sprintf "Didn't find symbol equivalent to %s symbol '%A' in %s" tag1 symUse1.Symbol tag2)
-            | [sym] -> ()  
+            | [_sym] -> ()  
             | [sym1;sym2] when sym1.Symbol.DisplayName = sym2.Symbol.DisplayName -> ()   // constructor and type
             | syms -> failwith (sprintf "Found multiple symbols for %s '%A' in  %s: '%A'" tag1 symUse1.Symbol tag2 [for sym in syms -> sym.Symbol ] )
 
@@ -3407,8 +3392,7 @@ let ``Test Project24 whole project errors`` () =
 
 [<Test>]
 let ``Test Project24 all symbols`` () = 
-    let wholeProjectResults = checker.ParseAndCheckProject(Project24.options) |> Async.RunSynchronously
-    let backgroundParseResults1, backgroundTypedParse1 = 
+    let _, backgroundTypedParse1 = 
         checker.GetBackgroundCheckResultsForFileInProject(Project24.fileName1, Project24.options) 
         |> Async.RunSynchronously   
 
@@ -3514,8 +3498,7 @@ let ``Test Project24 all symbols`` () =
 
 [<Test>]
 let ``Test symbol uses of properties with both getters and setters`` () = 
-    let wholeProjectResults = checker.ParseAndCheckProject(Project24.options) |> Async.RunSynchronously
-    let backgroundParseResults1, backgroundTypedParse1 = 
+    let _, backgroundTypedParse1 = 
         checker.GetBackgroundCheckResultsForFileInProject(Project24.fileName1, Project24.options) 
         |> Async.RunSynchronously   
 
@@ -3662,8 +3645,7 @@ let ``Test Project25 whole project errors`` () =
 [<Ignore "SKIPPED: Disabled until FSharp.Data.dll is build for dotnet core.">]
 #endif
 let ``Test Project25 symbol uses of type-provided members`` () = 
-    let wholeProjectResults = checker.ParseAndCheckProject(Project25.options) |> Async.RunSynchronously
-    let backgroundParseResults1, backgroundTypedParse1 = 
+    let _, backgroundTypedParse1 = 
         checker.GetBackgroundCheckResultsForFileInProject(Project25.fileName1, Project25.options) 
         |> Async.RunSynchronously   
 
@@ -3721,8 +3703,7 @@ let ``Test Project25 symbol uses of type-provided members`` () =
 [<Ignore "SKIPPED: Disabled until FSharp.Data.dll is build for dotnet core.">]
 #endif
 let ``Test symbol uses of type-provided types`` () = 
-    let wholeProjectResults = checker.ParseAndCheckProject(Project25.options) |> Async.RunSynchronously
-    let backgroundParseResults1, backgroundTypedParse1 = 
+    let _, backgroundTypedParse1 = 
         checker.GetBackgroundCheckResultsForFileInProject(Project25.fileName1, Project25.options) 
         |> Async.RunSynchronously   
 
@@ -3741,8 +3722,7 @@ let ``Test symbol uses of type-provided types`` () =
 
 [<Test>]
 let ``Test symbol uses of fully-qualified records`` () = 
-    let wholeProjectResults = checker.ParseAndCheckProject(Project25.options) |> Async.RunSynchronously
-    let backgroundParseResults1, backgroundTypedParse1 = 
+    let _, backgroundTypedParse1 = 
         checker.GetBackgroundCheckResultsForFileInProject(Project25.fileName1, Project25.options) 
         |> Async.RunSynchronously   
 
@@ -3797,13 +3777,6 @@ let ``Test Project26 whole project errors`` () =
 [<Test>]
 let ``Test Project26 parameter symbols`` () =
     let wholeProjectResults = checker.ParseAndCheckProject(Project26.options) |> Async.RunSynchronously
-
-    let allUsesOfAllSymbols = 
-        wholeProjectResults.GetAllUsesOfAllSymbols()
-        
-        |> Array.map (fun su -> su.Symbol.ToString(), su.Symbol.DisplayName, Project13.cleanFileName su.FileName, tups su.RangeAlternate, attribsOfSymbolUse su, attribsOfSymbol su.Symbol)
-
-
     let objSymbol = wholeProjectResults.GetAllUsesOfAllSymbols()  |> Array.find (fun su -> su.Symbol.DisplayName = "Class")
     let objEntity = objSymbol.Symbol :?> FSharpEntity
     
@@ -4599,17 +4572,6 @@ let ``Test project36 FSharpMemberOrFunctionOrValue.IsBaseValue`` () =
 
 [<Test>]
 let ``Test project36 FSharpMemberOrFunctionOrValue.IsConstructorThisValue & IsMemberThisValue`` () =
-    let wholeProjectResults = Project36.keepAssemblyContentsChecker.ParseAndCheckProject(Project36.options) |> Async.RunSynchronously
-    let declarations =
-        let checkedFile = wholeProjectResults.AssemblyContents.ImplementationFiles.[0]
-        match checkedFile.Declarations.[0] with
-        | FSharpImplementationFileDeclaration.Entity (_, subDecls) -> subDecls
-        | _ -> failwith "unexpected declaration"
-    let getExpr exprIndex =
-        match declarations.[exprIndex] with
-        | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(_,_,e) -> e
-        | FSharpImplementationFileDeclaration.InitAction e -> e
-        | _ -> failwith "unexpected declaration"
     // Instead of checking the symbol uses directly, walk the typed tree to check
     // the correct values are also visible from there. Also note you cannot use
     // BasicPatterns.ThisValue in these cases, this is only used when the symbol
@@ -5140,7 +5102,7 @@ module internal ProjectBig =
     let projFileName = Path.ChangeExtension(base2, ".fsproj")
     let fileSources = [ for (i,f) in fileNamesI -> (f, "module M" + string i) ]
     for (f,text) in fileSources do File.WriteAllText(f, text)
-    let fileSources2 = [ for (i,f) in fileSources -> FSharp.Compiler.Text.SourceText.ofString f ]
+    let fileSources2 = [ for (_,f) in fileSources -> FSharp.Compiler.Text.SourceText.ofString f ]
 
     let fileNames = [ for (_,f) in fileNamesI -> f ]
     let args = mkProjectCommandLineArgs (dllName, fileNames)
@@ -5306,7 +5268,7 @@ type A(i:int) =
 [<TestCase([| "--times"; "--warnaserror-:75"; "--warnaserror" |], [| false |])>]
 let ``#4030, Incremental builder creation warnings`` (args, errorSeverities) =
     let source = "module M"
-    let fileName, options = mkTestFileAndOptions source args
+    let fileName, options = mkTestFileAndOptions args
 
     let _, checkResults = parseAndCheckFile fileName source options
     checkResults.Errors |> Array.map (fun e -> e.Severity = FSharpErrorSeverity.Error) |> shouldEqual errorSeverities 

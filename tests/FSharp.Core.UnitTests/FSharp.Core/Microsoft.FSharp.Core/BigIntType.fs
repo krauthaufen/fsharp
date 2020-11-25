@@ -519,17 +519,12 @@ type BigIntType() =
                 -100I
             ]         
         VerifySeqsEqual resultNeg seqNeg
-        
-        let resultSmall1 = [0I..3I..9I]
-#if CROSS_PLATFORM_COMPILER // see https://bugzilla.xamarin.com/show_bug.cgi?id=22591
-#else
+
         let resultSmall1 = [BigInteger()..3I..9I]
         let seqSmall = [0I;3I;6I;9I]        
         VerifySeqsEqual resultSmall1 seqSmall
 
         CheckThrowsArgumentException(fun () -> [0I .. BigInteger() .. 3I] |> ignore)
-
-#endif
         VerifySeqsEqual [0I .. -2I .. 10I] []
                    
         ()
@@ -538,11 +533,8 @@ type BigIntType() =
     member this.Subtraction() = 
         Assert.AreEqual((100I - 123I),-23I)
         Assert.AreEqual((0I - bigPositiveB),bigNegativeB)
-#if CROSS_PLATFORM_COMPILER // see https://bugzilla.xamarin.com/show_bug.cgi?id=22591
-#else
         Assert.AreEqual((BigInteger() - bigPositiveB),bigNegativeB)
         Assert.AreEqual((bigPositiveB - BigInteger()),bigPositiveB)
-#endif
         Assert.AreEqual((bigPositiveB - 0I),bigPositiveB)                                      
         Assert.AreEqual((-100I - (-123I)),23I)
         Assert.AreEqual((100I - (-123I)),223I)

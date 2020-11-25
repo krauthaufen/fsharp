@@ -37,7 +37,7 @@ module internal Hooks =
         ()
 
     // Show the ToolWindow, e.g. as a result of the Menu button click.
-    let ShowToolWindow (this:Package) (sender:obj) (e:EventArgs) =
+    let ShowToolWindow (this:Package) (_:obj) (_:EventArgs) =
         try
             // Get the instance number 0 of this tool window.
             // The window is single instance so this instance will be the only one.
@@ -81,10 +81,10 @@ module internal Hooks =
         queryFSIToolWindow false this (fun window -> window.GetDebuggerState()) FsiDebuggerState.AttachedNotToFSI
 
     // FxCop request this function not be public
-    let private supportWhenFSharpDocument (sender:obj) (e:EventArgs) =    
+    let private supportWhenFSharpDocument (sender:obj) (_:EventArgs) =    
         let command = sender :?> OleMenuCommand       
         if command <> null then                        
-            let looksLikeFSharp,haveSelection = 
+            let looksLikeFSharp,_ = 
                 try // catch all exceptions from this block
                     let providerGlobal   = Package.GetGlobalService(typeof<IOleServiceProvider>) :?> IOleServiceProvider
                     let provider         = new ServiceProvider(providerGlobal) :> System.IServiceProvider                    

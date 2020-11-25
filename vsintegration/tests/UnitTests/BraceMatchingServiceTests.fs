@@ -40,7 +40,7 @@ type BraceMatchingServiceTests()  =
         let parsingOptions, _ = checker.GetParsingOptionsFromProjectOptions projectOptions
         match FSharpBraceMatchingService.GetBraceMatchingResult(checker, sourceText, fileName, parsingOptions, position, "UnitTest") |> Async.RunSynchronously with
         | None -> ()
-        | Some(left, right) -> Assert.Fail("Found match for brace '{0}'", marker)
+        | Some(_, _) -> Assert.Fail("Found match for brace '{0}'", marker)
         
     member private this.VerifyBraceMatch(fileContents: string, startMarker: string, endMarker: string) =
         let sourceText = SourceText.From(fileContents)

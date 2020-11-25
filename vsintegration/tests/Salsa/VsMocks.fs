@@ -85,7 +85,7 @@ module internal VsMocks =
             | false, _ -> ()
             
         interface IVsFileChangeEx with
-            member fc.AdviseFileChange(pszMkDocument,grfFilter,pFCE,vsCookie) = 
+            member fc.AdviseFileChange(pszMkDocument,_,pFCE,vsCookie) = 
                 let pszMkDocument = Canonicalize pszMkDocument
 //                printfn "VsMocks.VsFileChangeEx: Advise %s " pszMkDocument
                 match fileToEvents.TryGetValue(pszMkDocument) with
@@ -93,13 +93,13 @@ module internal VsMocks =
                 | false, _ -> fileToEvents.Add(pszMkDocument, [pFCE])
                 vsCookie <- 0u
                 ok
-            member fc.UnadviseFileChange(vsCookie) = 
+            member fc.UnadviseFileChange(_) = 
 //                printfn "VsMocks.VsFileChangeEx: Unadvise %d " vsCookie
                 ok
-            member fc.SyncFile(pszMkDocument) = notimpl()
-            member fc.IgnoreFile(vsCookie, pszMkDocument, fIgnore) = notimpl()
-            member fc.AdviseDirChange(pszDir, fWatchSubDir, pFCE,vsCookie) = notimpl()
-            member fc.UnadviseDirChange(vsCookie) = notimpl()
+            member fc.SyncFile(_) = notimpl()
+            member fc.IgnoreFile(_, _, _) = notimpl()
+            member fc.AdviseDirChange(_, _, _,_) = notimpl()
+            member fc.UnadviseDirChange(_) = notimpl()
     
     /// Mockable versions of various VS interfaces. Use optional function parameters
     /// so that we don't have to specify all of them.       
@@ -993,9 +993,9 @@ module internal VsMocks =
             member x.Shutdown() =
                 innerLoggers |> List.iter (fun l -> l.Shutdown())
                 iEventSource <- null
-            member x.Parameters with get() = match innerLoggers with [] -> "" | h::t -> h.Parameters
+            member x.Parameters with get() = match innerLoggers with [] -> "" | h::_ -> h.Parameters
                                 and set(s) = innerLoggers |> List.iter (fun l -> l.Parameters <- s)
-            member x.Verbosity with get() = match innerLoggers with [] -> LoggerVerbosity.Normal | h::t -> h.Verbosity
+            member x.Verbosity with get() = match innerLoggers with [] -> LoggerVerbosity.Normal | h::_ -> h.Verbosity
                                and set(s) = innerLoggers |> List.iter (fun l -> l.Verbosity <- s)
 
     /////////////////////////////////

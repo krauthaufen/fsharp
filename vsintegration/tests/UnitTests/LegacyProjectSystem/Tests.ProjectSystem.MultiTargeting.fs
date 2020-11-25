@@ -69,7 +69,7 @@ type MultiTargeting() =
     member public this.``Multitargeting.DetermineRuntimeAndSKU`` () =
         DoWithTempFile "Test.fsproj" (fun projFile ->
             let sp, ccn = VsMocks.MakeMockServiceProviderAndConfigChangeNotifier40()
-            let refLibPath = this.prepTest(projFile)
+            let _ = this.prepTest(projFile)
             use project = TheTests.CreateProject(projFile, "true", ccn, sp)
             
             let validate (fn : System.Runtime.Versioning.FrameworkName) eR eS =

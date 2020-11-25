@@ -149,7 +149,7 @@ type public HashIfExpression() =
     [<Fact>]
     member this.NegativeParserTestCases()=
 
-        let errors, warnings, parser = createParser ()
+        let errors, _, parser = createParser ()
 
         let negativeTests =
             [|

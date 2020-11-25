@@ -61,7 +61,6 @@ type ArrayModule2() =
         Assert.AreEqual([|(0,10);(1,12);(2,14);(3,16);(4,18);(5,20)|], resultInt)
 
         // string array
-        let funcStr (x:int) (y:string) =  x+ y.Length
         let resultStr = Array.indexed [| "Lists"; "Are"; "Commonly"; "List" |]
         Assert.AreEqual([| (0,"Lists");(1,"Are");(2,"Commonly");(3,"List") |], resultStr)
 
@@ -1086,7 +1085,6 @@ type ArrayModule2() =
         
         // string array    
         let resultStr = Array.unzip [|("A","a");("B","b");("C","c");("D","d")|]
-        let str = resultStr.ToString()
         if resultStr <> ([|"A"; "B";  "C" ; "D" |],[|"a";"b";"c";"d"|]) then Assert.Fail()
         
         // empty array     
@@ -1261,7 +1259,6 @@ type ArrayModule2() =
         
         // string array    
         let resultStr = Array.zip3 [|"A"; "B";  "C" ; "D" |]  [|"1";"2";"3";"4"|]  [|"a"; "b"; "c"; "d"|]
-        let str = resultStr.ToString()
         if resultStr <> [|("A","1","a");("B","2","b");("C","3","c");("D","4","d")|] then Assert.Fail()
         
         // empty array     

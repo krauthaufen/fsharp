@@ -126,9 +126,9 @@ let ``indexed is adding correct indexes`` () =
     Check.QuickThrowOnFailure indexed_and_zip<NormalFloat>
 
 let zip_and_zip3<'a when 'a : equality> (xs' : ('a*'a*'a) list) =
-    let xs = List.map (fun (x,y,z) -> x) xs'
-    let xs2 = List.map (fun (x,y,z) -> y) xs'
-    let xs3 = List.map (fun (x,y,z) -> z) xs'
+    let xs = List.map (fun (x,_,_) -> x) xs'
+    let xs2 = List.map (fun (_,y,_) -> y) xs'
+    let xs3 = List.map (fun (_,_,z) -> z) xs'
 
     let a = List.zip3 xs xs2 xs3
     let b = List.zip (List.zip xs xs2) xs3 |> List.map (fun ((a,b),c) -> a,b,c)
@@ -177,7 +177,7 @@ let ``splitInto produces chunks exactly `count` chunks with equal size (+/- 1)``
 
     Check.QuickThrowOnFailure prop
 
-let sort_and_sortby (xs : list<float>) (xs2 : list<float>) =
+let sort_and_sortby (xs : list<float>) (_ : list<float>) =
     let a = List.sortBy id xs |> Seq.toArray 
     let b = List.sort xs |> Seq.toArray
     let result = ref true
@@ -607,7 +607,7 @@ let ``replicate creates n instances of the given element`` () =
 let singleton_and_replicate<'a when 'a : comparison> (x:'a) (count:NonNegativeInt) =
     let count = int count
     let xs = List.replicate count x
-    let ys = [for i in 1..count -> List.singleton x] |> List.concat
+    let ys = [for _ in 1..count -> List.singleton x] |> List.concat
     xs = ys
 
 [<Fact>]
@@ -846,7 +846,7 @@ let ``List.allPairs first elements are correct`` () =
 
 let allPairsSnd<'a, 'b when 'b : equality> (xs : 'a list) (ys : 'b list) =
     let pairsSnd = List.allPairs xs ys |> List.map snd
-    let check = [ for i in 1 .. xs.Length do yield! ys ]
+    let check = [ for _ in 1 .. xs.Length do yield! ys ]
     pairsSnd = check
 
 [<Fact>]

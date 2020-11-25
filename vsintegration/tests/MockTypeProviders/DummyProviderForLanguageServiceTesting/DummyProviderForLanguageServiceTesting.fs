@@ -44,7 +44,7 @@ module internal TPModule =
     // THe instantiated type has a static property that evaluates to the param passed
     let instantiateParametricType (typeName:string) (args:System.Object[]) =
         match args with
-        [| :? string as value; :? int as ignoredvalue; |] -> 
+        [| :? string as value; :? int |] -> 
             let typeParam = ProvidedTypeDefinition(thisAssembly,namespaceName, typeName, Some typeof<System.Object>)     
             let propParam = ProvidedProperty("Param1", typeof<string>, 
                                              IsStatic = true,
@@ -212,7 +212,7 @@ module TypeProviderThatThrowsErrorsModule =
         let parameter = ProvidedStaticParameter("N", typeof<int>)
         t.DefineStaticParameters(
             parameters = [parameter],
-            instantiationFunction = fun name args ->
+            instantiationFunction = fun _ args ->
                 match args with
                 | [|:? int as n|] when n > 0 ->
                     let errors = Seq.init n (sprintf "Error %d" >> Failure)
@@ -450,7 +450,7 @@ module RegexTypeProvider =
                 // Declare a constructor
                 let ctor = ProvidedConstructor(
                             parameters = [], 
-                            InvokeCode = fun args -> <@@ Regex(pattern) :> obj @@>)
+                            InvokeCode = fun _ -> <@@ Regex(pattern) :> obj @@>)
 
                 // Add documentation to the constructor
                 ctor.AddXmlDoc "Initializes a regular expression instance"
@@ -484,13 +484,13 @@ module RegexTypeProviderUsingMethod =
             instantiationFunction=(fun methName parameterValues ->
 
               match parameterValues with 
-              | [| :? string as pattern1 |] -> 
+              | [| :? string |] -> 
                 let isMatch = ProvidedMethod(
                                 methodName = methName, 
                                 parameters = [ProvidedParameter("input", typeof<string>)], 
                                 returnType = typeof<bool>, 
                                 IsStaticMethod = true,
-                                InvokeCode = fun args -> <@@ true @@>) 
+                                InvokeCode = fun _ -> <@@ true @@>) 
 
                 isMatch.AddXmlDoc "Indicates whether the regular expression finds a match in the specified input string"
                 regexTyStatic.AddMember isMatch

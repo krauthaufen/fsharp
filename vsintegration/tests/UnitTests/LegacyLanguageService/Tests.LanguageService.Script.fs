@@ -20,10 +20,6 @@ type UsingMSBuild() as this =
 
     let notAA l = None,l
 
-    let createSingleFileFsx (code : string) = 
-        let (_, p, f) = this.CreateSingleFileProject(code, fileKind = SourceFileKind.FSX)
-        (p, f)
-
     let createSingleFileFsxFromLines (code : list<string>) = 
         let (_, p, f) = this.CreateSingleFileProject(code, fileKind = SourceFileKind.FSX)
         (p, f)
@@ -87,7 +83,7 @@ type UsingMSBuild() as this =
         AssertExactlyCountErrorSeenContaining(project,text,1)
 
     /// Assert that a given squiggle is an Error (or warning) containing the given text        
-    let AssertSquiggleIsErrorContaining,AssertSquiggleIsWarningContaining, AssertSquiggleIsErrorNotContaining,AssertSquiggleIsWarningNotContaining =         
+    let AssertSquiggleIsErrorContaining,AssertSquiggleIsWarningContaining, AssertSquiggleIsErrorNotContaining,_ =         
         let AssertSquiggle expectedSeverity nameOfExpected nameOfNotExpected assertf (squiggleOption,containing) = 
             match squiggleOption with
             | None -> Assert.Fail("Expected a squiggle but none was seen.")
@@ -102,12 +98,12 @@ type UsingMSBuild() as this =
 
     //Verify the error list in fsx file containd the expected string
     member private this.VerifyFSXErrorListContainedExpectedString(fileContents : string, expectedStr : string) =
-        let (_, project, file) = this.CreateSingleFileProject(fileContents, fileKind = SourceFileKind.FSX)
+        let (_, project, _) = this.CreateSingleFileProject(fileContents, fileKind = SourceFileKind.FSX)
         VerifyErrorListContainedExpetedStr(expectedStr,project)    
 
     //Verify no error list in fsx file 
     member private this.VerifyFSXNoErrorList(fileContents : string) =
-        let (_, project, file) = this.CreateSingleFileProject(fileContents, fileKind = SourceFileKind.FSX)
+        let (_, project, _) = this.CreateSingleFileProject(fileContents, fileKind = SourceFileKind.FSX)
         AssertNoErrorsOrWarnings(project)  
     //Verify QuickInfo Containd In Fsx file
     member public this.AssertQuickInfoContainsAtEndOfMarkerInFsxFile (code : string) marker expected =
@@ -177,21 +173,21 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS() 
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["namespace Namespace"
                                      "type Foo = "
                                      "     static member public Property = 0"
                                      ])    
-        let file1 = OpenFile(project,"File1.fs")   
-        let script2 = AddFileFromText(project,"Script2.fsx",
+        let _ = OpenFile(project,"File1.fs")   
+        let _ = AddFileFromText(project,"Script2.fsx",
                                       ["#load \"File1.fs\""
                                        ])    
-        let script2 = OpenFile(project,"Script2.fsx")   
-        let script2 = AddFileFromText(project,"Script1.fsx",
+        let _ = OpenFile(project,"Script2.fsx")   
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"Script1.fsx\""
                                        "Namespace.Foo.Property" 
                                        ])    
-        let script2 = OpenFile(project,"Script2.fsx")   
+        let _ = OpenFile(project,"Script2.fsx")   
         TakeCoffeeBreak(this.VS)
         AssertNoErrorsOrWarnings(project)
 
@@ -202,19 +198,19 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()  
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["namespace Namespace"
                                      "type Foo = "
                                      "     static member public Property = 0"
                                      ])    
-        let script2 = AddFileFromText(project,"Script2.fsx",
+        let _ = AddFileFromText(project,"Script2.fsx",
                                       ["#load \"File1.fs\""
                                        ])    
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"Script2.fsx\""
                                        "Namespace.Foo.NonExistingProperty" 
                                        ])    
-        let script1 = OpenFile(project,"Script1.fsx")   
+        let _ = OpenFile(project,"Script1.fsx")   
         TakeCoffeeBreak(this.VS)
         AssertExactlyOneErrorSeenContaining(project, "NonExistingProperty")
 
@@ -245,14 +241,14 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let fs = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["#light"
                                      "namespace MyNamespace" 
                                      "    module MyModule ="
                                      "        let x = 1" 
                                      ])            
         
-        let fsx = AddFileFromText(project,"File2.fsx",
+        let _ = AddFileFromText(project,"File2.fsx",
                                     ["#light"
                                      "//#load \"File1.fs\"" 
                                      "open MyNamespace.MyModule"
@@ -276,14 +272,14 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let fs = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["#light"
                                      "namespace MyNamespace" 
                                      "    module MyModule ="
                                      "        let x = 1" 
                                      ])            
         
-        let fsx = AddFileFromText(project,"File2.fsx",
+        let _ = AddFileFromText(project,"File2.fsx",
                                     ["#light"
                                      "#load \"File1.fs\"" 
                                      "open MyNamespace.MyModule"
@@ -306,7 +302,7 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let fs = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["module InDifferentFS"
                                      "#if INTERACTIVE"
                                      "let x = 1"
@@ -320,7 +316,7 @@ type UsingMSBuild() as this =
                                      "#endif"
                                      ])            
         
-        let fsx = AddFileFromText(project,"File2.fsx",
+        let _ = AddFileFromText(project,"File2.fsx",
                                     [
                                      "#load \"File1.fs\"" 
                                      "InDifferentFS."
@@ -368,21 +364,21 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["namespace Namespace"
                                      "type Foo = "
                                      "     static member public Property = 0"
                                      ])    
-        let script2 = AddFileFromText(project,"Script2.fsx",
+        let _ = AddFileFromText(project,"Script2.fsx",
                                       ["#load \"Script1.fsx\""
                                        "#load \"File1.fs\""
                                        ])    
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"Script2.fsx\""
                                        "#load \"File1.fs\""
                                        "Namespace.Foo.Property" 
                                        ])    
-        let script1 = OpenFile(project,"Script1.fsx")   
+        let _ = OpenFile(project,"Script1.fsx")   
         TakeCoffeeBreak(this.VS)
         AssertNoErrorsOrWarnings(project)
         
@@ -393,26 +389,26 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let file1fsi = AddFileFromText(project,"File1.fsi",
+        let _ = AddFileFromText(project,"File1.fsi",
                                       ["namespace Namespace"
                                        "type Foo ="
                                        "  class"
                                        "    static member Property : int" // Not exposing 'HiddenProperty'
                                        "  end"
                                        ])            
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["namespace Namespace"
                                      "type Foo = "
                                      "     static member public HiddenProperty = 0"
                                      "     static member public Property = 0"
                                      ])    
 
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"File1.fsi\""
                                        "#load \"File1.fs\""
                                        "Namespace.Foo.Property" 
                                        ])     
-        let script1 = OpenFile(project,"Script1.fsx")   
+        let _ = OpenFile(project,"Script1.fsx")   
         AssertNoErrorsOrWarnings(project) 
 
     // #load of .fsi is respected at second #load level (for non-hidden property) 
@@ -422,29 +418,29 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let file1fsi = AddFileFromText(project,"File1.fsi",
+        let _ = AddFileFromText(project,"File1.fsi",
                                       ["namespace Namespace"
                                        "type Foo ="
                                        "  class"
                                        "    static member Property : int" // Not exposing 'HiddenProperty'
                                        "  end"
                                        ])            
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["namespace Namespace"
                                      "type Foo = "
                                      "     static member public HiddenProperty = 0"
                                      "     static member public Property = 0"
                                      ])    
 
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"File1.fsi\""
                                        "#load \"File1.fs\""
                                        ])     
-        let script2 = AddFileFromText(project,"Script2.fsx",
+        let _ = AddFileFromText(project,"Script2.fsx",
                                       ["#load \"Script1.fsx\""
                                        "Namespace.Foo.Property" 
                                        ])    
-        let script2 = OpenFile(project,"Script2.fsx")   
+        let _ = OpenFile(project,"Script2.fsx")   
         AssertNoErrorsOrWarnings(project) 
 
     // #load of .fsi is respected when dispersed between two #load levels (for non-hidden property)
@@ -454,29 +450,29 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let file1fsi = AddFileFromText(project,"File1.fsi",
+        let _ = AddFileFromText(project,"File1.fsi",
                                       ["namespace Namespace"
                                        "type Foo ="
                                        "  class"
                                        "    static member Property : int" // Not exposing 'HiddenProperty'
                                        "  end"
                                        ])            
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["namespace Namespace"
                                      "type Foo = "
                                      "     static member public HiddenProperty = 0"
                                      "     static member public Property = 0"
                                      ])    
 
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"File1.fsi\""
                                        ])     
-        let script2 = AddFileFromText(project,"Script2.fsx",
+        let _ = AddFileFromText(project,"Script2.fsx",
                                       ["#load \"Script1.fsx\""
                                        "#load \"File1.fs\""
                                        "Namespace.Foo.Property" 
                                        ])    
-        let script2 = OpenFile(project,"Script2.fsx")   
+        let _ = OpenFile(project,"Script2.fsx")   
         AssertNoErrorsOrWarnings(project)  
         
     // #load of .fsi is respected when dispersed between two #load levels (the other way) (for non-hidden property)
@@ -486,29 +482,29 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let file1fsi = AddFileFromText(project,"File1.fsi",
+        let _ = AddFileFromText(project,"File1.fsi",
                                       ["namespace Namespace"
                                        "type Foo ="
                                        "  class"
                                        "    static member Property : int" // Not exposing 'HiddenProperty'
                                        "  end"
                                        ])            
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["namespace Namespace"
                                      "type Foo = "
                                      "     static member public HiddenProperty = 0"
                                      "     static member public Property = 0"
                                      ])    
 
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"File1.fs\""
                                        ])     
-        let script2 = AddFileFromText(project,"Script2.fsx",
+        let _ = AddFileFromText(project,"Script2.fsx",
                                       ["#load \"File1.fsi\""
                                        "#load \"Script1.fsx\""
                                        "Namespace.Foo.Property" 
                                        ])    
-        let script2 = OpenFile(project,"Script2.fsx")   
+        let _ = OpenFile(project,"Script2.fsx")   
         AssertNoErrorsOrWarnings(project)  
         
     // #nowarn seen in closed .fsx is global to the closure
@@ -518,10 +514,10 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let thisProject = AddFileFromText(project,"ThisProject.fsx",
+        let _ = AddFileFromText(project,"ThisProject.fsx",
                                       ["#nowarn \"44\""
                                        ])  
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"ThisProject.fsx\"" // Should bring in #nowarn "44" so we don't see this warning:
                                        "[<System.Obsolete(\"x\")>]"
                                        "let fn x = 0"
@@ -587,7 +583,7 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let file1 = AddFileFromText(project,"lib.fs",
+        let _ = AddFileFromText(project,"lib.fs",
                                     ["module Lib"
                                      "let X = 42"
                                      ])
@@ -603,11 +599,11 @@ type UsingMSBuild() as this =
         Directory.CreateDirectory(script2Dir) |> ignore
         File.Move(bld.ExecutableOutput, Path.Combine(ProjectDirectory(project), "aaa\\lib.exe"))
 
-        let script1 = File.WriteAllLines(script1Path,
+        let _ = File.WriteAllLines(script1Path,
                                       ["#load \"../aaa/bbb/Script2.fsx\""
                                        "printfn \"%O\" Lib.X"
                                        ])
-        let script2 = File.WriteAllLines(script2Path,
+        let _ = File.WriteAllLines(script2Path,
                                       ["#r \"../lib.exe\""
                                        ])
 
@@ -624,7 +620,7 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()  
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let file1 = AddFileFromText(project,"lib.fs",
+        let _ = AddFileFromText(project,"lib.fs",
                                     ["module Lib"
                                      "let X = 42"
                                      ])
@@ -640,11 +636,11 @@ type UsingMSBuild() as this =
         Directory.CreateDirectory(script2Dir) |> ignore
         File.Move(bld.ExecutableOutput, Path.Combine(ProjectDirectory(project), "aaa\\lib.exe"))
 
-        let script1 = File.WriteAllLines(script1Path,
+        let _ = File.WriteAllLines(script1Path,
                                       ["#load \"../aaa/Script2.fsx\""
                                        "printfn \"%O\" Lib.X"
                                        ])
-        let script2 = File.WriteAllLines(script2Path,
+        let _ = File.WriteAllLines(script2Path,
                                       ["#r \"lib.exe\""
                                        ])
                                        
@@ -661,20 +657,20 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let fs = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["#light"
                                      "namespace MyNamespace" 
                                      "    module MyModule ="
                                      "        let x = 1" 
                                      ])            
         
-        let fsx = AddFileFromText(project,"File2.fsx",
+        let _ = AddFileFromText(project,"File2.fsx",
                                     ["#light"
                                      "#load \"File1.fs\"" 
                                      "open MyNamespace.MyModule"
                                      "printfn \"%d\" x"
                                      ])    
-        let fsx = OpenFile(project,"File2.fsx")    
+        let _ = OpenFile(project,"File2.fsx")    
         AssertNoErrorsOrWarnings(project)
 
     // In this bug the #loaded file contains a level-4 warning (copy to avoid mutation). This warning was reported at the #load in file2.fsx but shouldn't have been.s
@@ -684,17 +680,17 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let fs = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["module File1Module"
                                      "let x = System.DateTime.Now - System.DateTime.Now"
                                      "x.Add(x) |> ignore" 
                                      ])            
         
-        let fsx = AddFileFromText(project,"File2.fsx",
+        let _ = AddFileFromText(project,"File2.fsx",
                                     [
                                      "#load \"File1.fs\"" 
                                      ])    
-        let fsx = OpenFile(project,"File2.fsx")    
+        let _ = OpenFile(project,"File2.fsx")    
         AssertNoErrorsOrWarnings(project) 
 
     /// FEATURE: .fsx files have automatic imports of certain system assemblies.
@@ -723,21 +719,21 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["namespace Namespace"
                                      "type Foo = "
                                      "     static member public Property = 0"
                                      ])    
-        let script2 = AddFileFromText(project,"Script2.fsx",
+        let _ = AddFileFromText(project,"Script2.fsx",
                                       ["#load \"Script1.fsx\""
                                        "#load \"File1.fs\""
                                        ])    
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"Script2.fsx\""
                                        "#load \"File1.fs\""
                                        "Namespace.Foo.NonExistingProperty" 
                                        ])     
-        let script1 = OpenFile(project,"Script1.fsx")   
+        let _ = OpenFile(project,"Script1.fsx")   
         AssertExactlyOneErrorSeenContaining(project, "NonExistingProperty")  
 
     // #load of .fsi is respected
@@ -747,26 +743,26 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let file1fsi = AddFileFromText(project,"File1.fsi",
+        let _ = AddFileFromText(project,"File1.fsi",
                                       ["namespace Namespace"
                                        "type Foo ="
                                        "  class"
                                        "    static member Property : int" // Not exposing 'HiddenProperty'
                                        "  end"
                                        ])            
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["namespace Namespace"
                                      "type Foo = "
                                      "     static member public HiddenProperty = 0"
                                      "     static member public Property = 0"
                                      ])    
 
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"File1.fsi\""
                                        "#load \"File1.fs\""
                                        "Namespace.Foo.HiddenProperty" 
                                        ])     
-        let script1 = OpenFile(project,"Script1.fsx")   
+        let _ = OpenFile(project,"Script1.fsx")   
         AssertExactlyOneErrorSeenContaining(project, "HiddenProperty")   
 
     // #load of .fsi is respected at second #load level
@@ -776,29 +772,29 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let file1fsi = AddFileFromText(project,"File1.fsi",
+        let _ = AddFileFromText(project,"File1.fsi",
                                       ["namespace Namespace"
                                        "type Foo ="
                                        "  class"
                                        "    static member Property : int" // Not exposing 'HiddenProperty'
                                        "  end"
                                        ])            
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["namespace Namespace"
                                      "type Foo = "
                                      "     static member public HiddenProperty = 0"
                                      "     static member public Property = 0"
                                      ])    
 
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"File1.fsi\""
                                        "#load \"File1.fs\""
                                        ])     
-        let script2 = AddFileFromText(project,"Script2.fsx",
+        let _ = AddFileFromText(project,"Script2.fsx",
                                       ["#load \"Script1.fsx\""
                                        "Namespace.Foo.HiddenProperty" 
                                        ])    
-        let script2 = OpenFile(project,"Script2.fsx")   
+        let _ = OpenFile(project,"Script2.fsx")   
         AssertExactlyOneErrorSeenContaining(project, "HiddenProperty") 
         
     // #load of .fsi is respected when dispersed between two #load levels
@@ -808,29 +804,29 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let file1fsi = AddFileFromText(project,"File1.fsi",
+        let _ = AddFileFromText(project,"File1.fsi",
                                       ["namespace Namespace"
                                        "type Foo ="
                                        "  class"
                                        "    static member Property : int" // Not exposing 'HiddenProperty'
                                        "  end"
                                        ])            
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["namespace Namespace"
                                      "type Foo = "
                                      "     static member public HiddenProperty = 0"
                                      "     static member public Property = 0"
                                      ])    
 
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"File1.fsi\""
                                        ])     
-        let script2 = AddFileFromText(project,"Script2.fsx",
+        let _ = AddFileFromText(project,"Script2.fsx",
                                       ["#load \"Script1.fsx\""
                                        "#load \"File1.fs\""
                                        "Namespace.Foo.HiddenProperty" 
                                        ])    
-        let script2 = OpenFile(project,"Script2.fsx")   
+        let _ = OpenFile(project,"Script2.fsx")   
         AssertExactlyOneErrorSeenContaining(project, "HiddenProperty")    
         
     // #load of .fsi is respected when dispersed between two #load levels (the other way)
@@ -840,29 +836,29 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let file1fsi = AddFileFromText(project,"File1.fsi",
+        let _ = AddFileFromText(project,"File1.fsi",
                                       ["namespace Namespace"
                                        "type Foo ="
                                        "  class"
                                        "    static member Property : int" // Not exposing 'HiddenProperty'
                                        "  end"
                                        ])            
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     ["namespace Namespace"
                                      "type Foo = "
                                      "     static member public HiddenProperty = 0"
                                      "     static member public Property = 0"
                                      ])    
 
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"File1.fs\""
                                        ])     
-        let script2 = AddFileFromText(project,"Script2.fsx",
+        let _ = AddFileFromText(project,"Script2.fsx",
                                       ["#load \"File1.fsi\""
                                        "#load \"Script1.fsx\""
                                        "Namespace.Foo.HiddenProperty" 
                                        ])    
-        let script2 = OpenFile(project,"Script2.fsx")   
+        let _ = OpenFile(project,"Script2.fsx")   
         AssertExactlyOneErrorSeenContaining(project, "HiddenProperty")   
         
     // Bug seen during development: A #load in an .fs would be followed.
@@ -872,21 +868,21 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let file2 = AddFileFromText(project,"File2.fs",
+        let _ = AddFileFromText(project,"File2.fs",
                                       ["namespace Namespace"
                                        "type Type() ="
                                        "    static member Property = 0"
                                        ])  
-        let file1 = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                       ["#load \"File2.fs\""  // This is not allowed but it was working anyway.
                                        "namespace File2Namespace"
                                        ])                                              
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"File1.fs\""
                                        "Namespace.Type.Property"
                                        ])                                                   
 
-        let script1 = OpenFile(project,"Script1.fsx")   
+        let _ = OpenFile(project,"Script1.fsx")   
         TakeCoffeeBreak(this.VS)
         AssertExactlyOneErrorSeenContaining(project, "Namespace")  
 
@@ -904,7 +900,7 @@ type UsingMSBuild() as this =
         let code = 
                 ["System.ConsoleModifiers.Shift |> ignore "
                  "(3).ToString().Length |> ignore "]
-        let (project, file) = createSingleFileFsxFromLines code
+        let (_, file) = createSingleFileFsxFromLines code
         MoveCursorToEndOfMarker(file, "System.ConsoleModifiers.Sh")
         let tooltip = GetQuickInfoAtCursor file
         AssertContains(tooltip, @"[Signature:F:System.ConsoleModifiers.Shift]") // A message from the mock IDocumentationBuilder
@@ -977,7 +973,7 @@ type UsingMSBuild() as this =
         let code = 
             ["#light"
              "#r \"Bar.dll\""]
-        let (project, file) = createSingleFileFsxFromLines code
+        let (_, file) = createSingleFileFsxFromLines code
         MoveCursorToEndOfMarker(file,"#r \"Ba") 
         let squiggle = GetSquiggleAtCursor(file)
         TakeCoffeeBreak(this.VS)
@@ -990,11 +986,11 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")    
-        let script2 = AddFileFromText(project,"Script2.fsx",
+        let _ = AddFileFromText(project,"Script2.fsx",
                                       ["#load \"Script1.fsx\""
                                        "#r \"NonExisting\""
                                        ])      
-        let script1 = AddFileFromText(project,"Script1.fsx",
+        let _ = AddFileFromText(project,"Script1.fsx",
                                       ["#load \"Script2.fsx\""
                                        "#r \"System\""
                                        ])                                                   
@@ -1057,13 +1053,13 @@ type UsingMSBuild() as this =
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
         
-        let file1 = AddFileFromText(project,"File1.fs", 
+        let _ = AddFileFromText(project,"File1.fs", 
                                     ["#light"
                                      "module File1" 
                                      "DogChow" // <-- error
                                     ])
 
-        let file2 = AddFileFromText(project,"File2.fsx",
+        let _ = AddFileFromText(project,"File2.fsx",
                                     ["#light"
                                      "#load @\"File1.fs\""
                                      ])
@@ -1083,13 +1079,13 @@ type UsingMSBuild() as this =
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
         
-        let file1 = AddFileFromText(project,"File1.fs", 
+        let _ = AddFileFromText(project,"File1.fs", 
                                     ["module File1Module"
                                      "type WarningHere<'a> = static member X() = 0"
                                      "let y = WarningHere.X"
                                     ])
 
-        let file2 = AddFileFromText(project,"File2.fsx",
+        let _ = AddFileFromText(project,"File2.fsx",
                                     ["#light"
                                      "#load @\"File1.fs\""
                                      ])
@@ -1107,14 +1103,14 @@ type UsingMSBuild() as this =
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
         
-        let file1 = AddFileFromText(project,"File1.fs", 
+        let _ = AddFileFromText(project,"File1.fs", 
                                     [ "#light"
                                       "module File1" 
                                       "let a = 1 + \"\""
                                       "let c = new obj()"
                                       "let b = c.foo()"
                                     ])
-        let file2 = AddFileFromText(project,"File2.fsx",
+        let _ = AddFileFromText(project,"File2.fsx",
                                     ["#light"
                                      "#load @\"File1.fs\""
                                      ])
@@ -1139,12 +1135,12 @@ type UsingMSBuild() as this =
             result
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let file1 = AddFileFromText(project,"File1.fs", ["#light"])
+        let _ = AddFileFromText(project,"File1.fs", ["#light"])
         let projectOutput = time1 Build project "Time to build project"
         printfn "Output of building project was %s" projectOutput.ExecutableOutput
         printfn "Project directory is %s" (ProjectDirectory project)
         
-        let file2 = AddFileFromText(project,"File2.fsx",
+        let _ = AddFileFromText(project,"File2.fsx",
                                     ["#light"
                                      "#reference @\"bin\\Debug\\testproject.exe\""
                                      ])
@@ -1234,7 +1230,7 @@ type UsingMSBuild() as this =
                                      "#I @\"?\""
                                      """#r @"C:\path\does\not\exist.dll"  """
                                     ]
-        let (_, file) = createSingleFileFsxFromLines code
+        let (_, _) = createSingleFileFsxFromLines code
         TakeCoffeeBreak(this.VS) // This used to assert
 
     /// FEATURE: .fsx files have INTERACTIVE #defined
@@ -1259,7 +1255,7 @@ type UsingMSBuild() as this =
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
         
-        let file1 = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
+        let _ = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
                                       ["printfn \"Hello world\""])
         let build = time1 Build project "Time to build project"
         Assert.IsTrue(build.BuildSucceeded, "Expected build to succeed")
@@ -1274,12 +1270,12 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let fs = AddFileFromTextEx(project,"File.fs","File.fs",BuildAction.Compile,
+        let _ = AddFileFromTextEx(project,"File.fs","File.fs",BuildAction.Compile,
                                       ["namespace Namespace"
                                        "module Module ="
                                        "  let Value = 1"
                                       ])
-        let fsx = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
+        let _ = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
                                       ["#load \"File.fs\""
                                        "printfn \"%d\" Namespace.Module.Value"])
         let build = time1 Build project "Time to build project"
@@ -1297,12 +1293,12 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let fs = AddFileFromTextEx(project,"File.fs","File.fs",BuildAction.None,
+        let _ = AddFileFromTextEx(project,"File.fs","File.fs",BuildAction.None,
                                       ["namespace Namespace"
                                        "module Module ="
                                        "  let Value = 1"
                                       ])
-        let fsx = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
+        let _ = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
                                       ["#load \"File.fs\""
                                        "printfn \"%d\" Namespace.Module.Value"])
         let build = time1 Build project "Time to build project" 
@@ -1320,7 +1316,7 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let fsx = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
+        let _ = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
                                       ["let x = fsi.CommandLineArgs"])
         let build = time1 Build project "Time to build project" 
         if SupportsOutputWindowPane(this.VS) then 
@@ -1350,7 +1346,7 @@ type UsingMSBuild() as this =
                     </Reference>
                 </ItemGroup>" binariesFolder binariesFolder)
 
-        let fsx = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
+        let _ = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
                                       ["let x = fsi.CommandLineArgs"])
         let build = time1 Build project "Time to build project" 
         if SupportsOutputWindowPane(this.VS) then 
@@ -1369,17 +1365,17 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let fs1 = AddFileFromTextEx(project,"File1.fs","File1.fs",BuildAction.None,
+        let _ = AddFileFromTextEx(project,"File1.fs","File1.fs",BuildAction.None,
                                       ["namespace Namespace"
                                        "module Module1 ="
                                        "  let Value = 1"
                                       ])
-        let fs2 = AddFileFromTextEx(project,"File2.fs","File2.fs",BuildAction.None,
+        let _ = AddFileFromTextEx(project,"File2.fs","File2.fs",BuildAction.None,
                                       ["namespace Namespace"
                                        "module Module2 ="
                                        "  let Value = Module1.Value"
                                       ])                                      
-        let fsx = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
+        let _ = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
                                       [
                                        "#load \"File1.fs\""
                                        "#load \"File2.fs\""
@@ -1400,17 +1396,17 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let fs1 = AddFileFromTextEx(project,"File1.fs","File1.fs",BuildAction.Compile,
+        let _ = AddFileFromTextEx(project,"File1.fs","File1.fs",BuildAction.Compile,
                                       ["namespace Namespace"
                                        "module Module1 ="
                                        "  let Value = 1"
                                       ])
-        let fs2 = AddFileFromTextEx(project,"File2.fs","File2.fs",BuildAction.Compile,
+        let _ = AddFileFromTextEx(project,"File2.fs","File2.fs",BuildAction.Compile,
                                       ["namespace Namespace"
                                        "module Module2 ="
                                        "  let Value = Module1.Value"
                                       ])                                      
-        let fsx = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
+        let _ = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
                                       [
                                        "#load \"File2.fs\"" // Wrong order
                                        "#load \"File1.fs\""
@@ -1432,7 +1428,7 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let fsx = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
+        let _ = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
                                       [
                                        "#load \"NonexistentFile.fs\""
                                        ])
@@ -1453,7 +1449,7 @@ type UsingMSBuild() as this =
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let fsx = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
+        let _ = AddFileFromTextEx(project,"Script.fsx","Script.fsx",BuildAction.Compile,
                                       [
                                        "#r \"System.Messaging\""
                                        "let a = new System.Messaging.AccessControlEntry()"
@@ -1557,7 +1553,7 @@ type UsingMSBuild() as this =
             [
                 PathRelativeToTestAssembly(@"DummyProviderForLanguageServiceTesting.dll")
             ]
-        let (_, project, file) = this.CreateSingleFileProject(code, references = refs)
+        let (_, project, _) = this.CreateSingleFileProject(code, references = refs)
         TakeCoffeeBreak(this.VS)
         AssertNoErrorsOrWarnings(project)
 
@@ -1605,7 +1601,7 @@ type UsingMSBuild() as this =
             let project = CreateProject(solution,"testproject" + string (i % 20))    
             this.AddAssemblyReference(project, PathRelativeToTestAssembly(@"DummyProviderForLanguageServiceTesting.dll"))
             let fileName = sprintf "File%d.fs" i
-            let file1 = AddFileFromText(project,fileName, ["let x" + string i + " = N1.T1()" ])    
+            let _ = AddFileFromText(project,fileName, ["let x" + string i + " = N1.T1()" ])    
             let file = OpenFile(project,fileName)
             TakeCoffeeBreak(this.VS)
             AssertNoErrorsOrWarnings project   // ...and not an error on the first line.
@@ -1615,9 +1611,9 @@ type UsingMSBuild() as this =
             let tooltip = GetQuickInfoAtCursor file
             AssertContains(tooltip, "T1")
             ignore (GetF1KeywordAtCursor file)
-            let parmInfo = GetParameterInfoAtCursor file
+            let _ = GetParameterInfoAtCursor file
 
-            let file1 = OpenFile(project,fileName)   
+            let _ = OpenFile(project,fileName)   
 
             // The disposals should be at least one less 
             let c = countCreations()
@@ -1648,7 +1644,7 @@ type UsingMSBuild() as this =
                 Assert.IsTrue((countInvaldiationHandlersAdded() = countInvaldiationHandlersRemoved()), "Check4b2, all invlidation handlers removed, iteration " + string i)
         
         let c = countCreations()
-        let d = countDisposals()
+        let _ = countDisposals()
         Assert.IsTrue(c >= 50, "Check5, at end, countCreations() >= 50")
 
         ClearLanguageServiceRootCachesAndCollectAndFinalizeAllTransients(this.VS)

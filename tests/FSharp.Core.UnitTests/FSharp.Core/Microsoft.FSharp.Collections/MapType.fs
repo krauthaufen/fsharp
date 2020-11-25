@@ -349,7 +349,7 @@ type MapType() =
     member this.TryFind() =
     
         let l = (Map.ofArray [|(1,1);(2,4);(3,9)|])
-        let rem = l.TryFind(2)
+        
         Assert.AreEqual(l.TryFind(2),Some 4)         
     
         let e  = Map.empty<int,string>

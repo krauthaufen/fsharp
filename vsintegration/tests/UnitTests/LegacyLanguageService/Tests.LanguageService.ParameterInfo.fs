@@ -24,18 +24,11 @@ type UsingMSBuild()  =
     let GetParamDisplays(methods:Microsoft.VisualStudio.FSharp.LanguageService.MethodListForAMethodTip_DEPRECATED) =
             [ for i = 0 to methods.GetCount() - 1 do
                 yield [ for j = 0 to methods.GetParameterCount(i) - 1 do
-                            let (name,display,description) = methods.GetParameterInfo(i,j) 
+                            let (_,display,_) = methods.GetParameterInfo(i,j) 
                             yield display ] ]
       
     let AssertEmptyMethodGroup(resultMethodGroup:Microsoft.VisualStudio.FSharp.LanguageService.MethodListForAMethodTip_DEPRECATED option) =
-        Assert.IsTrue(resultMethodGroup.IsNone, "Expected an empty method group")              
-        
-    let AssertMethodGroupDesciptionsDoNotContain(methods:Microsoft.VisualStudio.FSharp.LanguageService.MethodListForAMethodTip_DEPRECATED, expectNotToBeThere) = 
-        for i = 0 to methods.GetCount() - 1 do
-            let description = methods.GetDescription(i)
-            if (description.Contains(expectNotToBeThere)) then
-                Console.WriteLine("Expected description {0} to not contain {1}", description, expectNotToBeThere)
-                AssertNotContains(description,expectNotToBeThere)
+        Assert.IsTrue(resultMethodGroup.IsNone, "Expected an empty method group")
  
     let AssertMethodGroup(resultMethodGroup:Microsoft.VisualStudio.FSharp.LanguageService.MethodListForAMethodTip_DEPRECATED option, expectedParamNamesSet:string list list) =
         Assert.IsTrue(resultMethodGroup.IsSome, "Expected a method group")
@@ -60,7 +53,7 @@ type UsingMSBuild()  =
                                            paramDisplay.Contains(expectedParamName))))
 
     member private this.GetMethodListForAMethodTip(fileContents : string, marker : string, ?addtlRefAssy : list<string>) = 
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
 
         MoveCursorToStartOfMarker(file, marker)
 
@@ -89,7 +82,7 @@ type UsingMSBuild()  =
 
         let paramDisplays = 
             [ for i = 0 to methodstr.GetParameterCount(index) - 1 do
-                let (name,display,description) = methodstr.GetParameterInfo(index,i)
+                let (_,display,_) = methodstr.GetParameterInfo(index,i)
                 yield display]
         Assert.IsTrue((expectedParams, paramDisplays) ||> List.forall2 (fun expectedParam paramDisplay -> paramDisplay.Contains(expectedParam)))
 
@@ -428,7 +421,7 @@ type UsingMSBuild()  =
     [<Test>]
     [<Ignore("https://github.com/Microsoft/visualfsharp/issues/6166")>]
     member public this.``Single.InMatchClause``() =
-        let v461 = Version(4,6,1)
+        let _ = Version(4,6,1)
         let fileContent = """
             let rec f l = 
                 match l with
@@ -640,7 +633,6 @@ type UsingMSBuild()  =
     
     [<Test>]
     member public this.``Single.Generics.Typeof``() =
-        let sevenTimes l = [ l; l; l; l; l; l; l ]
         this.TestGenericParameterInfo("typeof<int>(", [])
     [<Test>]
     [<Ignore("https://github.com/Microsoft/visualfsharp/issues/6166")>]
@@ -889,7 +881,7 @@ type UsingMSBuild()  =
         let (_, _, file) = this.CreateSingleFileProject(code)
         
         TakeCoffeeBreak(this.VS)
-        let gpatcc = GlobalParseAndTypeCheckCounter.StartNew(this.VS)
+        let _ = GlobalParseAndTypeCheckCounter.StartNew(this.VS)
 
         // In this case, we quickly type "f1(" and then see what parameter info would pop up.
         // This simulates the case when the user quickly types after the file has been TCed before.
@@ -912,7 +904,7 @@ type UsingMSBuild()  =
         let (_, _, file) = this.CreateSingleFileProject(code)
         
         TakeCoffeeBreak(this.VS)
-        let gpatcc = GlobalParseAndTypeCheckCounter.StartNew(this.VS)
+        let _ = GlobalParseAndTypeCheckCounter.StartNew(this.VS)
 
         // In this case, we quickly type "new Foo(" and then see what parameter info would pop up.
         // This simulates the case when the user quickly types after the file has been TCed before.
@@ -1057,7 +1049,7 @@ We really need to rewrite some code paths here to use the real parse tree rather
         let (_,_, file) = this.CreateSingleFileProject(testLines)
         MoveCursorToStartOfMarker(file, "let zz")
         // in the bug, this caused an assert to fire
-        let info = GetParameterInfoAtCursor file
+        let _ = GetParameterInfoAtCursor file
         ()
 
     [<Test>]
@@ -1068,7 +1060,7 @@ We really need to rewrite some code paths here to use the real parse tree rather
         let (_,_, file) = this.CreateSingleFileProject(testLines)
         MoveCursorToStartOfMarker(file, "printfn")
         // in the bug, this caused an assert to fire
-        let info = GetParameterInfoAtCursor file
+        let _ = GetParameterInfoAtCursor file
         ()
 
     [<Test>]
@@ -1508,7 +1500,7 @@ We really need to rewrite some code paths here to use the real parse tree rather
         let actualDisplays =
             [ for i = 0 to methodGroup.GetCount() - 1 do
                 yield [ for j = 0 to methodGroup.GetParameterCount(i) - 1 do
-                            let (name,display,description) = methodGroup.GetParameterInfo(i,j) 
+                            let (_,display,_) = methodGroup.GetParameterInfo(i,j) 
                             yield display ] ]
         let expected = [["Param1: string"; "ParamIgnored: int"]]  // key here is we want e.g. "int" and not "System.Int32"
         AssertEqual(expected, actualDisplays)
@@ -1962,7 +1954,7 @@ We really need to rewrite some code paths here to use the real parse tree rather
         let fileContents = """
             open System.ServiceModel
             let serviceHost = new ServiceHost((*Mark*))"""
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents, references = ["System.ServiceModel"])
+        let (_, _, file) = this.CreateSingleFileProject(fileContents, references = ["System.ServiceModel"])
  
         MoveCursorToStartOfMarker(file, "(*Mark*)") 
         TakeCoffeeBreak(this.VS)      

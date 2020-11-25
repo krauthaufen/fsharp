@@ -25,13 +25,13 @@ type internal EventWrapper() =
     
     let mutable disposed = false
     
-    member this.Set() =
+    member _.Set() =
         lock guard (fun () -> if not disposed then waitHandle.Set() |> ignore)
     
-    member this.Dispose() =
+    member _.Dispose() =
         lock guard (fun () -> disposed <- true; (waitHandle :> IDisposable).Dispose())
     
-    member this.WaitOne(timeout : int) =
+    member _.WaitOne(timeout : int) =
         waitHandle.WaitOne(timeout, true)
         
     interface IDisposable with
@@ -40,7 +40,7 @@ type internal EventWrapper() =
 
 /// Run function application return Some (f x) or None if execution exceeds timeout (in ms).
 /// Exceptions raised by f x are caught and reported in DEBUG mode.
-let timeoutApp descr timeoutMS (f : 'a -> 'b) (arg:'a) =
+let timeoutApp _descr timeoutMS (f : 'a -> 'b) (arg:'a) =
     use ev = new EventWrapper()
     let mutable r = None
     System.Threading.ThreadPool.QueueUserWorkItem(fun _ ->
@@ -56,7 +56,7 @@ let timeoutApp descr timeoutMS (f : 'a -> 'b) (arg:'a) =
                                                          "fsi.exe starts the remoting server at the end of it's initialisation sequence.\n" +
                                                          "The initialisation sequence takes an observable time (e.g. 2 seconds).\n" + 
                                                          "Remoting exceptions are to be expected on interupt/intelisense calls made before that point.\n" +
-                                                         "Context: " + descr + "\n" +
+                                                         "Context: " + _descr + "\n" +
                                                          "Exception: " + e.ToString()) |> ignore
 #endif             
                 None
@@ -255,7 +255,7 @@ let fsiStartInfo channelName =
     procInfo
 
 
-let nonNull = function null -> false | (s:string) -> true
+let nonNull = function null -> false | (_:string) -> true
 
 /// Represents an active F# Interactive process to which Visual Studio is connected via stdin/stdout/stderr and a remoting channel
 type FsiSession() = 

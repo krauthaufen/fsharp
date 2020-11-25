@@ -28,7 +28,7 @@ type OperatorsModule1() =
         
         // null
         let nullresult = funcKeyValue ( new System.Collections.Generic.KeyValuePair<string,char>(null,' '))
-        let (nullstring:string,blankchar:char) = nullresult
+        let (nullstring:string,_:char) = nullresult
         
         CheckThrowsNullRefException(fun () -> nullstring.ToString() |> ignore)
 
@@ -70,7 +70,7 @@ type OperatorsModule1() =
         Assert.AreEqual((101).ToString(), stringslice.[1,1])
         
         // null
-        let nullArray2D = Array2D.init 2 3 (fun i j -> null)
+        let nullArray2D = Array2D.init 2 3 (fun _ _ -> null)
         let nullslice = Operators.OperatorIntrinsics.GetArraySlice2D nullArray2D param1D1 param1D2 param2D1 param2D2
         Assert.AreEqual(null, nullslice.[1,1])
 
@@ -129,22 +129,22 @@ type OperatorsModule1() =
         Assert.AreEqual((101).ToString(), stringArray2D1.[1,1])
         
         // null
-        let nullArray2D1 = Array2D.init 2 3 (fun i j -> null)
-        let nullArray2D2 = Array2D.init 2 3 (fun i j -> null)
+        let nullArray2D1 = Array2D.init 2 3 (fun _ _ -> null)
+        let nullArray2D2 = Array2D.init 2 3 (fun _ _ -> null)
         Operators.OperatorIntrinsics.SetArraySlice2D nullArray2D1 param1D1 param1D2 param2D1 param2D2 nullArray2D2
         CheckThrowsNullRefException(fun () -> nullArray2D1.[0,0].ToString()  |> ignore)
 
     [<Fact>]
     member _.OptimizedRangesSetArraySlice3D() =
-        let intArray1 = Array3D.init 2 3 4 (fun i j k -> i*10+j)
-        let intArray2 = Array3D.init 2 3 4 (fun i j k -> i*100+j)
+        let intArray1 = Array3D.init 2 3 4 (fun i j _ -> i*10+j)
+        let intArray2 = Array3D.init 2 3 4 (fun i j _ -> i*100+j)
         Operators.OperatorIntrinsics.SetArraySlice3D intArray1 (Some 0) (Some 1) (Some 0) (Some 1) (Some 0) (Some 1) intArray2
         Assert.AreEqual(101, intArray1.[1,1,1])
 
     [<Fact>]
     member _.OptimizedRangesSetArraySlice4D() =
-        let intArray1 = Array4D.init 2 3 4 5 (fun i j k l -> i*10+j)
-        let intArray2 = Array4D.init 2 3 4 5 (fun i j k l -> i*100+j)
+        let intArray1 = Array4D.init 2 3 4 5 (fun i j _ _ -> i*10+j)
+        let intArray2 = Array4D.init 2 3 4 5 (fun i j _ _ -> i*100+j)
         Operators.OperatorIntrinsics.SetArraySlice4D intArray1 (Some 0) (Some 1) (Some 0) (Some 1) (Some 0) (Some 1) (Some 0) (Some 1) intArray2
         Assert.AreEqual(101, intArray1.[1,1,1,1])
 

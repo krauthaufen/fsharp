@@ -44,7 +44,7 @@ type CancellationType() =
         let is2Called = ref false
         let is3Called = ref false
         let assertAndOff (expected:bool) (r:bool ref) = Assert.AreEqual(expected,!r); r := false
-        let r1 = cts1.Token.Register(Action<obj>(fun _ -> is1Called := true), null)
+        let _ = cts1.Token.Register(Action<obj>(fun _ -> is1Called := true), null)
         let r2 = cts1.Token.Register(Action<obj>(fun _ -> is2Called := true), null)
         let r3 = cts2.Token.Register(Action<obj>(fun _ -> is3Called := true), null) 
         Assert.False(!is1Called)
@@ -188,14 +188,14 @@ type CancellationType() =
         use cts = new CancellationTokenSource()
         let token = cts.Token
         let callbackRun = ref false
-        let reg = token.Register(Action<obj>(fun _ ->
+        let _ = token.Register(Action<obj>(fun _ ->
                 lock callbackRun (fun() ->
                     Assert.False(!callbackRun, "Callback should run only once")
                     callbackRun := true
                 )
             ), null)
         Assert.False(!callbackRun)
-        let asyncs = seq { for i in 1..1000 do yield async { cts.Cancel() } }
+        let asyncs = seq { for _ in 1..1000 do yield async { cts.Cancel() } }
         asyncs |> Async.Parallel |> Async.RunSynchronously |> ignore
         Assert.True(!callbackRun, "Callback should run at least once")
 
@@ -281,7 +281,7 @@ type CancellationType() =
             let msg = sprintf "Excepted TimeoutException wrapped in an AggregateException, but got %A" res
             printfn "failure msg: %s" msg
             Assert.Fail (msg)
-        with :? AggregateException as agg -> ()
+        with :? AggregateException -> ()
 
     [<Fact>]
     member this.Equality() =

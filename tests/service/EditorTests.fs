@@ -1,4 +1,5 @@
 ﻿
+
 // To run the tests in this file:
 //
 // Technique 1: Compile VisualFSharp.UnitTests.dll and run it as a set of unit tests
@@ -62,7 +63,6 @@ let ``Intro test`` () =
     let inputLines = input.Split('\n')
     let file = "/home/user/Test.fsx"
     let parseResult, typeCheckResults =  parseAndCheckScript(file, input) 
-    let identToken = FSharpTokenTag.IDENT
 //    let projectOptions = checker.GetProjectOptionsFromScript(file, input) |> Async.RunSynchronously
 
     // So we check that the messages are the same
@@ -81,9 +81,6 @@ let ``Intro test`` () =
         printfn "Good! got an error, hopefully with the right text: %A" msg
         msg.Message.Contains("Missing qualification after '.'") |> shouldEqual true
 
-    // Get tool tip at the specified location
-    let tip = typeCheckResults.GetToolTipText(4, 7, inputLines.[1], ["foo"], identToken)
-    // (sprintf "%A" tip).Replace("\n","") |> shouldEqual """FSharpToolTipText [Single ("val foo : unit -> unitFull name: Test.foo",None)]"""
     // Get declarations (autocomplete) for a location
     let partialName = { QualifyingIdents = []; PartialIdent = "msg"; EndColumn = 22; LastDotPos = None }
     let decls =  typeCheckResults.GetDeclarationListInfo(Some parseResult, 7, inputLines.[6], partialName, (fun _ -> []))
@@ -120,7 +117,6 @@ let ``Basic cancellation test`` () =
     use _holder = IncrementalBuild.LocallyInjectCancellationFault()
     
     // Split the input & define file name
-    let inputLines = input.Split('\n')
     let file = "/home/user/Test.fsx"
     async { 
         checker.ClearLanguageServiceRootCachesAndCollectAndFinalizeAllTransients()
@@ -147,7 +143,7 @@ let ``GetMethodsAsSymbols should return all overloads of a method as FSharpSymbo
     // Split the input & define file name
     let inputLines = input.Split('\n')
     let file = "/home/user/Test.fsx"
-    let parseResult, typeCheckResults =  parseAndCheckScript(file, input)
+    let _, typeCheckResults =  parseAndCheckScript(file, input)
     let methodsSymbols = typeCheckResults.GetMethodsAsSymbols(5, 27, inputLines.[4], ["String"; "Concat"])
     match methodsSymbols with
     | Some methods ->
@@ -188,7 +184,7 @@ type C() =
 let ``Symbols basic test`` () = 
 
     let file = "/home/user/Test.fsx"
-    let untyped2, typeCheckResults2 = parseAndCheckScript(file, input2)
+    let _, typeCheckResults2 = parseAndCheckScript(file, input2)
 
     let partialAssemblySignature = typeCheckResults2.PartialAssemblySignature
     
@@ -198,7 +194,7 @@ let ``Symbols basic test`` () =
 let ``Symbols many tests`` () = 
 
     let file = "/home/user/Test.fsx"
-    let untyped2, typeCheckResults2 = parseAndCheckScript(file, input2)
+    let _, typeCheckResults2 = parseAndCheckScript(file, input2)
 
     let partialAssemblySignature = typeCheckResults2.PartialAssemblySignature
     
@@ -206,8 +202,6 @@ let ``Symbols many tests`` () =
     let moduleEntity = partialAssemblySignature.Entities.[0]
 
     moduleEntity.DisplayName |> shouldEqual "Test"
-
-    let classEntity = moduleEntity.NestedEntities.[0]
 
     let fnVal = moduleEntity.MembersFunctionsAndValues.[0]
 
@@ -276,7 +270,6 @@ let ``Expression typing test`` () =
     let inputLines = input3.Split('\n')
     let file = "/home/user/Test.fsx"
     let parseResult, typeCheckResults =  parseAndCheckScript(file, input3) 
-    let identToken = FSharpTokenTag.IDENT
 
     for msg in typeCheckResults.Errors do 
         printfn "***Expression typing test: Unexpected  error: %A" msg.Message
@@ -311,7 +304,6 @@ type Test() =
     let parseResult, typeCheckResults =  parseAndCheckScript(file, input) 
 
     let decls = typeCheckResults.GetDeclarationListInfo(Some parseResult, 4, inputLines.[3], PartialLongName.Empty(20), (fun _ -> []))
-    let item = decls.Items |> Array.tryFind (fun d -> d.Name = "abc")
     decls.Items |> Seq.exists (fun d -> d.Name = "abc") |> shouldEqual true
 
 [<Test>]
@@ -328,7 +320,6 @@ type Test() =
     let parseResult, typeCheckResults =  parseAndCheckScript(file, input) 
 
     let decls = typeCheckResults.GetDeclarationListInfo(Some parseResult, 4, inputLines.[3], PartialLongName.Empty(21), (fun _ -> []))
-    let item = decls.Items |> Array.tryFind (fun d -> d.Name = "abc")
     decls.Items |> Seq.exists (fun d -> d.Name = "abc") |> shouldEqual true
  
 [<Test>]
@@ -482,7 +473,7 @@ let _ =  printf "            %*a" 3 (fun _ _ -> ()) 2
 """
 
     let file = "/home/user/Test.fsx"
-    let parseResult, typeCheckResults = parseAndCheckScript(file, input) 
+    let _, typeCheckResults = parseAndCheckScript(file, input) 
 
     typeCheckResults.Errors |> shouldEqual [||]
     typeCheckResults.GetFormatSpecifierLocationsAndArity() 
@@ -512,7 +503,7 @@ let _ = List.iter(printfn \"\"\"%-A
                              \"\"\" 1 2)"
 
     let file = "/home/user/Test.fsx"
-    let parseResult, typeCheckResults = parseAndCheckScript(file, input) 
+    let _, typeCheckResults = parseAndCheckScript(file, input) 
 
     typeCheckResults.Errors |> shouldEqual [||]
     typeCheckResults.GetFormatSpecifierLocationsAndArity() 
@@ -533,7 +524,7 @@ let _ = debug "[LanguageService] Type checking fails for '%s' with content=%A an
 """
 
     let file = "/home/user/Test.fsx"
-    let parseResult, typeCheckResults = parseAndCheckScript(file, input) 
+    let _, typeCheckResults = parseAndCheckScript(file, input) 
 
     typeCheckResults.Errors |> shouldEqual [||]
     typeCheckResults.GetFormatSpecifierLocationsAndArity() 
@@ -573,7 +564,7 @@ let s3 = $"abc %d{s.Length}
 """
 
     let file = "/home/user/Test.fsx"
-    let parseResult, typeCheckResults = parseAndCheckScriptWithOptions(file, input, [| "/langversion:preview" |]) 
+    let _, typeCheckResults = parseAndCheckScriptWithOptions(file, input, [| "/langversion:preview" |]) 
 
     typeCheckResults.Errors |> shouldEqual [||]
     typeCheckResults.GetFormatSpecifierLocationsAndArity() 
@@ -591,7 +582,7 @@ let ``Printf specifiers for triple quote interpolated strings`` () =
       "let _ = $\"\"\"abc %d{1} and %d{2+3}def\"\"\"  "
 
     let file = "/home/user/Test.fsx"
-    let parseResult, typeCheckResults = parseAndCheckScriptWithOptions(file, input, [| "/langversion:preview" |]) 
+    let _, typeCheckResults = parseAndCheckScriptWithOptions(file, input, [| "/langversion:preview" |]) 
 
     typeCheckResults.Errors |> shouldEqual [||]
     typeCheckResults.GetFormatSpecifierLocationsAndArity() 
@@ -610,7 +601,7 @@ let _ = sprintf "ABCDE"
 """
 
     let file = "/home/user/Test.fsx"
-    let parseResult, typeCheckResults = parseAndCheckScript(file, input) 
+    let _, typeCheckResults = parseAndCheckScript(file, input) 
     typeCheckResults.GetFormatSpecifierLocationsAndArity() 
     |> Array.map (fun (range, numArgs) -> range.StartLine, range.StartColumn, range.EndLine, range.EndColumn, numArgs)
     |> shouldEqual [||]
@@ -623,7 +614,7 @@ type DU = Case1
 """
 
     let file = "/home/user/Test.fsx"
-    let parseResult, typeCheckResults = parseAndCheckScript(file, input) 
+    let _, typeCheckResults = parseAndCheckScript(file, input) 
     typeCheckResults.GetAllUsesOfAllSymbolsInFile()
     |> Array.ofSeq
     |> Array.map (fun su -> 
@@ -642,7 +633,7 @@ let _ = arr.[..number2]
 """
 
     let file = "/home/user/Test.fsx"
-    let parseResult, typeCheckResults = parseAndCheckScript(file, input) 
+    let _, typeCheckResults = parseAndCheckScript(file, input) 
     typeCheckResults.GetAllUsesOfAllSymbolsInFile()
     |> Array.ofSeq
     |> Array.map (fun su -> 
@@ -677,7 +668,7 @@ let test2 = System.StringComparison.CurrentCulture
 let test3 = System.Text.RegularExpressions.RegexOptions.Compiled
 """
     let file = "/home/user/Test.fsx"
-    let parseResult, typeCheckResults = parseAndCheckScript(file, input) 
+    let _, typeCheckResults = parseAndCheckScript(file, input) 
     let allSymbols = typeCheckResults.GetAllUsesOfAllSymbolsInFile() 
     let enums =
         allSymbols
@@ -858,9 +849,9 @@ let f x =
     y + y
         )"""
     let file = "/home/user/Test.fsx"
-    let parseResult, typeCheckResults = parseAndCheckScript(file, input) 
+    let parseResult, _ = parseAndCheckScript(file, input) 
     let lines = input.Replace("\r", "").Split( [| '\n' |])
-    let positions = [ for (i,line) in Seq.indexed lines do for (j, c) in Seq.indexed line do yield Range.mkPos (Range.Line.fromZ i) j, line ]
+    let positions = [ for (i,line) in Seq.indexed lines do for (j, _) in Seq.indexed line do yield Range.mkPos (Range.Line.fromZ i) j, line ]
     let results = [ for pos, line in positions do 
                         match parseResult.ValidateBreakpointLocation pos with 
                         | Some r -> yield ((line, pos.Line, pos.Column), (r.StartLine, r.StartColumn, r.EndLine, r.EndColumn))  
@@ -912,9 +903,9 @@ type FooImpl() =
             }
         )"""
     let file = "/home/user/Test.fsx"
-    let parseResult, typeCheckResults = parseAndCheckScript(file, input) 
+    let parseResult, _ = parseAndCheckScript(file, input) 
     let lines = input.Replace("\r", "").Split( [| '\n' |])
-    let positions = [ for (i,line) in Seq.indexed lines do for (j, c) in Seq.indexed line do yield Range.mkPos (Range.Line.fromZ i) j, line ]
+    let positions = [ for (i,line) in Seq.indexed lines do for (j, _) in Seq.indexed line do yield Range.mkPos (Range.Line.fromZ i) j, line ]
     let results = [ for pos, line in positions do 
                         match parseResult.ValidateBreakpointLocation pos with 
                         | Some r -> yield ((line, pos.Line, pos.Column), (r.StartLine, r.StartColumn, r.EndLine, r.EndColumn))  

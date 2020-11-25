@@ -61,13 +61,13 @@ type FSharpQuotationsTests() =
     member x.ReShapeTypechecking_Let() = 
         let q0 = <@ let a = 1 in a @>
         match q0 with
-        |   ExprShape.ShapeCombination(shape, [value;lambda]) ->
+        |   ExprShape.ShapeCombination(shape, [_;lambda]) ->
                 let goodValue = <@ 2 @>
                 ExprShape.RebuildShapeCombination(shape, [goodValue;lambda]) |> ignore
         |   _ -> Assert.Fail()
         let q1 = <@ let a = 1 in a @>
         match q1 with
-        |   ExprShape.ShapeCombination(shape, [value;lambda]) ->
+        |   ExprShape.ShapeCombination(shape, [_;lambda]) ->
                 let wrongValue = <@ "!" @>
                 Check.argumentException(fun () -> ExprShape.RebuildShapeCombination(shape, [wrongValue;lambda]))
         |   _ -> Assert.Fail()

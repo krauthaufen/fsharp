@@ -143,7 +143,7 @@ type ObservableModule() =
 
         let timesListened = ref 0
         kqfc.BroadcastSignal
-        |> Observable.add(fun rbEventArgs -> incr timesListened)
+        |> Observable.add(fun _ -> incr timesListened)
 
         kqfc.BeginBroadcasting(
             [

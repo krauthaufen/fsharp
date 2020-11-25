@@ -30,10 +30,8 @@ module SeqMultipleIteration =
 
     [<Fact>]
     let ``Seq.groupBy only evaluates the seq once`` () =
-        let s, haveCalled = makeNewSeq ()
-        let groups : seq<int * seq<int>> = Seq.groupBy id s
+        let _, haveCalled = makeNewSeq ()
         Assert.False !haveCalled
-        let groups : list<int * seq<int>> = Seq.toList groups
         // Seq.groupBy iterates the entire sequence as soon as it begins iteration.
         Assert.True !haveCalled
 

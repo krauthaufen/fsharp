@@ -107,7 +107,7 @@ type Array4Module() =
         CheckThrowsIndexOutRangException(fun () -> Array4D.get strArr 0 0 0 2 |> ignore)
         
         // empty array  
-        let emptyArray = Array4D.init 0 0 0 0 (fun i j k l -> Assert.Fail())
+        let emptyArray = Array4D.init 0 0 0 0 (fun _ _ _ _ -> Assert.Fail())
         CheckThrowsIndexOutRangException (fun () -> Array4D.get emptyArray 1 0 0 0 |> ignore)
         CheckThrowsIndexOutRangException (fun () -> Array4D.get emptyArray 0 1 0 0 |> ignore)
         CheckThrowsIndexOutRangException (fun () -> Array4D.get emptyArray 0 0 1 0 |> ignore)

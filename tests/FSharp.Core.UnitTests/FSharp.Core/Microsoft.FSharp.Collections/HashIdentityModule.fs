@@ -62,21 +62,21 @@ type HashIdentityModule() =
     member this.FromFunctions() =
         
         // value type
-        let valueDict = new Dictionary<int,string>(HashIdentity.FromFunctions (fun x -> 1) (fun x y -> x > y))
+        let valueDict = new Dictionary<int,string>(HashIdentity.FromFunctions (fun _ -> 1) (fun x y -> x > y))
         Assert.AreEqual(0,valueDict.Count)
         valueDict.Add(3,"C")
         Assert.AreEqual(1,valueDict.Count)
         Assert.True(valueDict.ContainsValue("C"))    
 
         // reference type
-        let refDict = new Dictionary<string,int>(HashIdentity.FromFunctions (fun x -> 1) (fun x y -> x > y))
+        let refDict = new Dictionary<string,int>(HashIdentity.FromFunctions (fun _ -> 1) (fun x y -> x > y))
         Assert.AreEqual(0,refDict.Count)
         refDict.Add("...",3)
         Assert.AreEqual(1,refDict.Count)
         Assert.True(refDict.ContainsValue(3))
 
         // empty type     
-        let eptDict = new Dictionary<int,int>(HashIdentity.FromFunctions (fun x -> 1) (fun x y -> x > y))
+        let eptDict = new Dictionary<int,int>(HashIdentity.FromFunctions (fun _ -> 1) (fun x y -> x > y))
         Assert.AreEqual(0,eptDict.Count)
         Assert.False(eptDict.ContainsKey(3))
         

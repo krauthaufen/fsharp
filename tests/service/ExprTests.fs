@@ -99,51 +99,51 @@ module internal Utils =
         | BasicPatterns.AddressSet(e1,e2) -> printExpr 0 e1 + " <- " + printExpr 0 e2
         | BasicPatterns.Application(f,tyargs,args) -> quote low (printExpr 10 f + printTyargs tyargs + " " + printCurriedArgs args)
         | BasicPatterns.BaseValue(_) -> "base"
-        | BasicPatterns.CallWithWitnesses(Some obj,v,tyargs1,tyargs2,witnessL,argsL) -> printObjOpt (Some obj) + v.CompiledName  + printTyargs tyargs2 + printTupledArgs (witnessL @ argsL)
+        | BasicPatterns.CallWithWitnesses(Some obj,v,_,tyargs2,witnessL,argsL) -> printObjOpt (Some obj) + v.CompiledName  + printTyargs tyargs2 + printTupledArgs (witnessL @ argsL)
         | BasicPatterns.CallWithWitnesses(None,v,tyargs1,tyargs2,witnessL,argsL) -> v.DeclaringEntity.Value.CompiledName + printTyargs tyargs1 + "." + v.CompiledName  + printTyargs tyargs2 + " " + printTupledArgs (witnessL @ argsL)
-        | BasicPatterns.Call(Some obj,v,tyargs1,tyargs2,argsL) -> printObjOpt (Some obj) + v.CompiledName  + printTyargs tyargs2 + printTupledArgs argsL
+        | BasicPatterns.Call(Some obj,v,_,tyargs2,argsL) -> printObjOpt (Some obj) + v.CompiledName  + printTyargs tyargs2 + printTupledArgs argsL
         | BasicPatterns.Call(None,v,tyargs1,tyargs2,argsL) -> v.DeclaringEntity.Value.CompiledName + printTyargs tyargs1 + "." + v.CompiledName  + printTyargs tyargs2 + " " + printTupledArgs argsL
         | BasicPatterns.Coerce(ty1,e1) -> quote low (printExpr 10 e1 + " :> " + printTy ty1)
-        | BasicPatterns.DefaultValue(ty1) -> "dflt"
+        | BasicPatterns.DefaultValue(_) -> "dflt"
         | BasicPatterns.FastIntegerForLoop _ -> "for-loop"
-        | BasicPatterns.ILAsm(s,tyargs,args) -> s + printTupledArgs args 
+        | BasicPatterns.ILAsm(s,_,args) -> s + printTupledArgs args 
         | BasicPatterns.ILFieldGet _ -> "ILFieldGet"
         | BasicPatterns.ILFieldSet _ -> "ILFieldSet"
         | BasicPatterns.IfThenElse (a,b,c) -> "(if " + printExpr 0 a + " then " + printExpr 0 b + " else " + printExpr 0 c + ")"
         | BasicPatterns.Lambda(v,e1) -> "fun " + v.CompiledName + " -> " + printExpr 0 e1
         | BasicPatterns.Let((v,e1),b) -> "let " + (if v.IsMutable then "mutable " else "") + v.CompiledName + ": " + printTy v.FullType + " = " + printExpr 0 e1 + " in " + printExpr 0 b
-        | BasicPatterns.LetRec(vse,b) -> "let rec ... in " + printExpr 0 b
-        | BasicPatterns.NewArray(ty,es) -> "[|" + (es |> Seq.map (printExpr 0) |> String.concat "; ") +  "|]" 
-        | BasicPatterns.NewDelegate(ty,es) -> "new-delegate" 
-        | BasicPatterns.NewObject(v,tys,args) -> "new " + v.DeclaringEntity.Value.CompiledName + printTupledArgs args 
+        | BasicPatterns.LetRec(_,b) -> "let rec ... in " + printExpr 0 b
+        | BasicPatterns.NewArray(_,es) -> "[|" + (es |> Seq.map (printExpr 0) |> String.concat "; ") +  "|]" 
+        | BasicPatterns.NewDelegate(_,_) -> "new-delegate" 
+        | BasicPatterns.NewObject(v,_,args) -> "new " + v.DeclaringEntity.Value.CompiledName + printTupledArgs args 
         | BasicPatterns.NewRecord(v,args) -> 
             let fields = v.TypeDefinition.FSharpFields
             "{" + ((fields, args) ||> Seq.map2 (fun f a -> f.Name + " = " + printExpr 0 a) |> String.concat "; ") + "}" 
         | BasicPatterns.NewAnonRecord(v,args) -> 
             let fields = v.AnonRecordTypeDetails.SortedFieldNames 
             "{" + ((fields, args) ||> Seq.map2 (fun f a -> f+ " = " + printExpr 0 a) |> String.concat "; ") + "}" 
-        | BasicPatterns.NewTuple(v,args) -> printTupledArgs args 
-        | BasicPatterns.NewUnionCase(ty,uc,args) -> uc.CompiledName + printTupledArgs args 
+        | BasicPatterns.NewTuple(_,args) -> printTupledArgs args 
+        | BasicPatterns.NewUnionCase(_,uc,args) -> uc.CompiledName + printTupledArgs args 
         | BasicPatterns.Quote(e1) -> "quote" + printTupledArgs [e1]
-        | BasicPatterns.FSharpFieldGet(obj, ty,f) -> printObjOpt obj + f.Name 
+        | BasicPatterns.FSharpFieldGet(obj, _,f) -> printObjOpt obj + f.Name 
         | BasicPatterns.AnonRecordGet(obj, ty, n) -> printExpr 0 obj + "." + ty.AnonRecordTypeDetails.SortedFieldNames.[n]
-        | BasicPatterns.FSharpFieldSet(obj, ty,f,arg) -> printObjOpt obj + f.Name + " <- " + printExpr 0 arg
+        | BasicPatterns.FSharpFieldSet(obj, _,f,arg) -> printObjOpt obj + f.Name + " <- " + printExpr 0 arg
         | BasicPatterns.Sequential(e1,e2) -> "(" + printExpr 0 e1 + "; " + printExpr 0 e2 + ")"
         | BasicPatterns.ThisValue _ -> "this"
         | BasicPatterns.TryFinally(e1,e2) -> "try " + printExpr 0 e1 + " finally " + printExpr 0 e2
         | BasicPatterns.TryWith(e1,_,_,vC,eC) -> "try " + printExpr 0 e1 + " with " + vC.CompiledName + " -> " + printExpr 0 eC
-        | BasicPatterns.TupleGet(ty,n,e1) -> printExpr 10 e1 + ".Item" + string n
-        | BasicPatterns.DecisionTree(dtree,targets) -> "match " + printExpr 10 dtree + " targets ..."
-        | BasicPatterns.DecisionTreeSuccess (tg,es) -> "$" + string tg
-        | BasicPatterns.TypeLambda(gp1,e1) -> "FUN ... -> " + printExpr 0 e1 
+        | BasicPatterns.TupleGet(_,n,e1) -> printExpr 10 e1 + ".Item" + string n
+        | BasicPatterns.DecisionTree(dtree,_) -> "match " + printExpr 10 dtree + " targets ..."
+        | BasicPatterns.DecisionTreeSuccess (tg,_) -> "$" + string tg
+        | BasicPatterns.TypeLambda(_,e1) -> "FUN ... -> " + printExpr 0 e1 
         | BasicPatterns.TypeTest(ty,e1) -> printExpr 10 e1 + " :? " + printTy ty
-        | BasicPatterns.UnionCaseSet(obj,ty,uc,f1,e1) -> printExpr 10 obj + "." + f1.Name + " <- " + printExpr 0 e1
-        | BasicPatterns.UnionCaseGet(obj,ty,uc,f1) -> printExpr 10 obj + "." + f1.Name
-        | BasicPatterns.UnionCaseTest(obj,ty,f1) -> printExpr 10 obj + ".Is" + f1.Name
-        | BasicPatterns.UnionCaseTag(obj,ty) -> printExpr 10 obj + ".Tag" 
-        | BasicPatterns.ObjectExpr(ty,basecall,overrides,iimpls) -> "{ " + printExpr 10 basecall + " with " + printOverrides overrides + " " + printIimpls iimpls + " }"
-        | BasicPatterns.TraitCall(tys,nm,_,argtys,tinst,args) -> "trait call " + nm + printTupledArgs args
-        | BasicPatterns.Const(obj,ty) -> 
+        | BasicPatterns.UnionCaseSet(obj,_,_,f1,e1) -> printExpr 10 obj + "." + f1.Name + " <- " + printExpr 0 e1
+        | BasicPatterns.UnionCaseGet(obj,_,_,f1) -> printExpr 10 obj + "." + f1.Name
+        | BasicPatterns.UnionCaseTest(obj,_,f1) -> printExpr 10 obj + ".Is" + f1.Name
+        | BasicPatterns.UnionCaseTag(obj,_) -> printExpr 10 obj + ".Tag" 
+        | BasicPatterns.ObjectExpr(_,basecall,overrides,iimpls) -> "{ " + printExpr 10 basecall + " with " + printOverrides overrides + " " + printIimpls iimpls + " }"
+        | BasicPatterns.TraitCall(_,nm,_,_,_,args) -> "trait call " + nm + printTupledArgs args
+        | BasicPatterns.Const(obj,_) -> 
             match obj with 
             | :? string  as s -> "\"" + s + "\""
             | null -> "()"
@@ -160,7 +160,7 @@ module internal Utils =
     and printParams (vs: FSharpMemberOrFunctionOrValue list) = "(" + String.concat "," (vs |> List.map (fun v -> v.CompiledName)) + ")"
     and printCurriedParams (vs: FSharpMemberOrFunctionOrValue list list) = String.concat " " (List.map printParams vs)
     and printTy ty = ty.Format(FSharpDisplayContext.Empty)
-    and printTyargs tyargs = match tyargs with [] -> "" | args -> "<" + String.concat "," (List.map printTy tyargs) + ">"
+    and printTyargs tyargs = match tyargs with [] -> "" | _ -> "<" + String.concat "," (List.map printTy tyargs) + ">"
     and printOverrides ors = String.concat ";" (List.map printOverride ors)
     and printOverride o = 
         match o.CurriedParameterGroups with
@@ -228,9 +228,9 @@ module internal Utils =
     let rec exprsOfDecl (d: FSharpImplementationFileDeclaration) = 
         seq {
            match d with 
-            | FSharpImplementationFileDeclaration.Entity(e,ds) ->
+            | FSharpImplementationFileDeclaration.Entity(_,ds) ->
                 yield! exprsOfDecls ds
-            | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(v,vs,e) ->
+            | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(v,_,e) ->
                if not v.IsCompilerGenerated then
                   yield e, e.Range
             | FSharpImplementationFileDeclaration.InitAction(e) ->
@@ -292,15 +292,15 @@ module internal Utils =
         | BasicPatterns.ILFieldSet (Some e,_,_,v) -> Seq.append (collectMembers e) (collectMembers v)
         | BasicPatterns.ILFieldSet _ -> Seq.empty
         | BasicPatterns.IfThenElse (a,b,c) -> Seq.collect collectMembers [ a; b; c ]
-        | BasicPatterns.Lambda(v,e1) -> collectMembers e1
-        | BasicPatterns.Let((v,e1),b) -> Seq.append (collectMembers e1) (collectMembers b)
+        | BasicPatterns.Lambda(_,e1) -> collectMembers e1
+        | BasicPatterns.Let((_,e1),b) -> Seq.append (collectMembers e1) (collectMembers b)
         | BasicPatterns.LetRec(vse,b) -> Seq.append (vse |> Seq.collect (snd >> collectMembers)) (collectMembers b)
         | BasicPatterns.NewArray(_,es) -> Seq.collect collectMembers es
-        | BasicPatterns.NewDelegate(ty,es) -> collectMembers es
-        | BasicPatterns.NewObject(v,tys,args) -> Seq.append (Seq.singleton v) (Seq.collect collectMembers args)
-        | BasicPatterns.NewRecord(v,args) -> Seq.collect collectMembers args
-        | BasicPatterns.NewTuple(v,args) -> Seq.collect collectMembers args
-        | BasicPatterns.NewUnionCase(ty,uc,args) -> Seq.collect collectMembers args
+        | BasicPatterns.NewDelegate(_,es) -> collectMembers es
+        | BasicPatterns.NewObject(v,_,args) -> Seq.append (Seq.singleton v) (Seq.collect collectMembers args)
+        | BasicPatterns.NewRecord(_,args) -> Seq.collect collectMembers args
+        | BasicPatterns.NewTuple(_,args) -> Seq.collect collectMembers args
+        | BasicPatterns.NewUnionCase(_,_,args) -> Seq.collect collectMembers args
         | BasicPatterns.Quote(e1) -> collectMembers e1
         | BasicPatterns.FSharpFieldGet(Some obj, _,_) -> collectMembers obj
         | BasicPatterns.FSharpFieldGet _ -> Seq.empty
@@ -310,16 +310,16 @@ module internal Utils =
         | BasicPatterns.ThisValue _ -> Seq.empty
         | BasicPatterns.TryFinally(e1,e2) -> Seq.append (collectMembers e1) (collectMembers e2)
         | BasicPatterns.TryWith(e1,_,f,_,eC) -> Seq.collect collectMembers [ e1; f; eC ]
-        | BasicPatterns.TupleGet(ty,n,e1) -> collectMembers e1
+        | BasicPatterns.TupleGet(_,_,e1) -> collectMembers e1
         | BasicPatterns.DecisionTree(dtree,targets) -> Seq.append (collectMembers dtree) (targets |> Seq.collect (snd >> collectMembers))
-        | BasicPatterns.DecisionTreeSuccess (tg,es) -> Seq.collect collectMembers es
-        | BasicPatterns.TypeLambda(gp1,e1) -> collectMembers e1
-        | BasicPatterns.TypeTest(ty,e1) -> collectMembers e1
-        | BasicPatterns.UnionCaseSet(obj,ty,uc,f1,e1) -> Seq.append (collectMembers obj) (collectMembers e1)
-        | BasicPatterns.UnionCaseGet(obj,ty,uc,f1) -> collectMembers obj
-        | BasicPatterns.UnionCaseTest(obj,ty,f1) -> collectMembers obj
-        | BasicPatterns.UnionCaseTag(obj,ty) -> collectMembers obj
-        | BasicPatterns.ObjectExpr(ty,basecall,overrides,iimpls) -> 
+        | BasicPatterns.DecisionTreeSuccess (_,es) -> Seq.collect collectMembers es
+        | BasicPatterns.TypeLambda(_,e1) -> collectMembers e1
+        | BasicPatterns.TypeTest(_,e1) -> collectMembers e1
+        | BasicPatterns.UnionCaseSet(obj,_,_,_,e1) -> Seq.append (collectMembers obj) (collectMembers e1)
+        | BasicPatterns.UnionCaseGet(obj,_,_,_) -> collectMembers obj
+        | BasicPatterns.UnionCaseTest(obj,_,_) -> collectMembers obj
+        | BasicPatterns.UnionCaseTag(obj,_) -> collectMembers obj
+        | BasicPatterns.ObjectExpr(_,basecall,overrides,iimpls) -> 
             seq {
                 yield! collectMembers basecall
                 for o in overrides do
@@ -328,8 +328,8 @@ module internal Utils =
                     for o in i do
                         yield! collectMembers o.Body
             }
-        | BasicPatterns.TraitCall(tys,nm,_,argtys,tinst,args) -> Seq.collect collectMembers args
-        | BasicPatterns.Const(obj,ty) -> Seq.empty
+        | BasicPatterns.TraitCall(_,_,_,_,_,args) -> Seq.collect collectMembers args
+        | BasicPatterns.Const(_,_) -> Seq.empty
         | BasicPatterns.Value(v) -> Seq.singleton v
         | BasicPatterns.ValueSet(v,e1) -> Seq.append (Seq.singleton v) (collectMembers e1)
         | BasicPatterns.WhileLoop(e1,e2) -> Seq.append (collectMembers e1) (collectMembers e2) 
@@ -341,7 +341,7 @@ module internal Utils =
             match d with 
             | FSharpImplementationFileDeclaration.Entity(_,ds) ->
                 yield! printMembersOfDeclatations ds
-            | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(v,vs,e) ->
+            | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(v,_,e) ->
                 yield printMemberSignature v
                 yield! collectMembers e |> Seq.map printMemberSignature
             | FSharpImplementationFileDeclaration.InitAction(e) ->
@@ -3158,9 +3158,7 @@ let ``Test ProjectForWitnesses1 GetWitnessPassingInfo`` () =
         | Some (nm, argTypes) ->
             nm |> shouldEqual "callXY$W"
             argTypes.Count |> shouldEqual 2
-            let argName1 = argTypes.[0].Name
             let argText1 = argTypes.[0].Type.ToString()
-            let argName2 = argTypes.[1].Name
             let argText2 = argTypes.[1].Type.ToString()
             argText1 |> shouldEqual "type  ^T ->  ^U -> Microsoft.FSharp.Core.unit"
             argText2 |> shouldEqual "type  ^T ->  ^U -> Microsoft.FSharp.Core.unit"

@@ -88,7 +88,7 @@ type ListModule02() =
         // integer List  
         let funcInt x y z = (x + y) / z
         let resultInt = List.map3 funcInt  [ 1..10 ]  [2..2..20] [3..3..30]
-        let expectedInt = List.init 10 (fun x ->  1)    
+        let expectedInt = List.init 10 (fun _ ->  1)    
         Assert.AreEqual(expectedInt, resultInt)
         
         // string List
@@ -114,7 +114,6 @@ type ListModule02() =
                 | _ when x % 3 = 0 -> [999;999]            
                 | _ -> [168;168]
         let resultInt = List.collect funcInt [ 1..5 ]
-        let resultList = List.toArray resultInt        
         Assert.AreEqual([168;168;168;168;999;999;168;168;168;168;], resultInt )
         
         // string List
@@ -954,7 +953,6 @@ type ListModule02() =
         
         // string List    
         let resultStr = List.unzip [(2,"b"); (3,"c"); (4,"d"); (5,"e")]
-        let str = resultStr.ToString()        
         Assert.AreEqual(([2;3;4;5],["b";"c";"d";"e"]) , resultStr)
         
         // empty List     

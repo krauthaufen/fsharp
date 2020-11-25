@@ -36,7 +36,7 @@ type Miscellaneous() =
 
     //[<Test>]   // keep disabled unless trying to prove that UnhandledExceptionHandler is working 
     member public this.EnsureThatUnhandledExceptionsCauseAnAssert() =
-        this.MakeProjectAndDo([], ["System"], "", (fun proj ->
+        this.MakeProjectAndDo([], ["System"], "", (fun _ ->
             let t = new System.Threading.Thread(new System.Threading.ThreadStart(fun () -> failwith "foo"))
             t.Start()
             System.Threading.Thread.Sleep(1000)
@@ -91,7 +91,7 @@ type Miscellaneous() =
     [<Test>]
     member public this.``Miscellaneous.FSharpFileNode.RelativeFilePath`` () =
         this.MakeProjectAndDo(["orig1.fs"], [], "", (fun project ->
-            let absFilePath = Path.Combine(project.ProjectFolder, "orig1.fs")
+            let _ = Path.Combine(project.ProjectFolder, "orig1.fs")
             let files = new List<FSharpFileNode>()
             project.FindNodesOfType(files)
             Assert.AreEqual(1, files.Count)
@@ -103,7 +103,7 @@ type Miscellaneous() =
     [<Test>]
     member public this.``Miscellaneous.FSharpFileNode.CreateServices`` () =
         this.MakeProjectAndDo(["orig1.fs"], [], "", (fun project ->
-            let absFilePath = Path.Combine(project.ProjectFolder, "orig1.fs")
+            let _ = Path.Combine(project.ProjectFolder, "orig1.fs")
             let files = new List<FSharpFileNode>()
             project.FindNodesOfType(files)
             Assert.AreEqual(1, files.Count)
@@ -249,7 +249,7 @@ type Miscellaneous() =
     member public this.``LoadProject.x86`` () =
         this.MakeProjectAndDoWithProjectFile(["foo.fs"], ["System"],
             this.MSBuildProjectMultiPlatform(["x86",""],"x86"),
-            (fun project projFileName ->
+            (fun project _ ->
                 this.CheckPlatformNames(project, [|"x86"|])
                 let refContainer =
                     let l = new List<ReferenceContainerNode>()
@@ -264,7 +264,7 @@ type Miscellaneous() =
     member public this.``BuildAndClean``() =
         this.MakeProjectAndDoWithProjectFileAndConfigChangeNotifier(["foo.fs"], [], 
              this.MSBuildProjectBoilerplate "Library", 
-             (fun project ccn projFileName ->
+             (fun project _ _ ->
                 let fooPath = Path.Combine(project.ProjectFolder, "foo.fs")
                 File.AppendAllText(fooPath, "#light")
                 File.AppendAllText(fooPath, "module Foo")
@@ -280,7 +280,7 @@ type Miscellaneous() =
                 
                 let success = ref false
                 use event = new System.Threading.ManualResetEvent(false)
-                let (hr, cookie) = 
+                let (_, cookie) = 
                     buildableCfg.AdviseBuildStatusCallback(
                         { new IVsBuildStatusCallback with
                             member this.BuildBegin pfContinue = pfContinue <- 1; VSConstants.S_OK
@@ -335,7 +335,7 @@ type Miscellaneous() =
     member public this.``DebuggingDLLFailsFunc``() =
         this.MakeProjectAndDoWithProjectFileAndConfigChangeNotifier(["foo.fs"], [], 
                this.MSBuildProjectBoilerplate "Library",  
-               (fun project ccn projFileName ->
+               (fun project ccn _ ->
                    ccn((project :> IVsHierarchy), "Debug|Any CPU")
                    let fooPath = Path.Combine(project.ProjectFolder, "foo.fs")
                    File.AppendAllText(fooPath, "#light")                
@@ -360,7 +360,7 @@ type Miscellaneous() =
     member public this.``DebuggingEXESucceeds``() =
         this.MakeProjectAndDoWithProjectFileAndConfigChangeNotifier(["foo.fs"], [], 
             this.MSBuildProjectBoilerplate "Exe",  
-            (fun project ccn projFileName ->
+            (fun project ccn _ ->
                 ccn((project :> IVsHierarchy), "Debug|Any CPU")
                 let fooPath = Path.Combine(project.ProjectFolder, "foo.fs")
                 File.AppendAllText(fooPath, "#light")                
@@ -392,7 +392,6 @@ type Miscellaneous() =
                 let mkDoc = Path.Combine(project.ProjectFolder, relPath)
                 let priority = [|VSDOCUMENTPRIORITY.DP_Unsupported|]
                 let mutable found = 0
-                let mutable itemId = 0ul
                 let hr,_ = project.IsDocumentInProject(mkDoc, &found, priority)
                 AssertEqual VSConstants.S_OK hr
                 AssertEqual shouldBeInProject (found <> 0)
@@ -427,8 +426,7 @@ type Miscellaneous() =
             ))
         
     [<Test>]
-    member public this.``BuildMacroValues`` () = 
-        let logger (message:string) = System.IO.File.AppendAllText(@"c:\temp\logfile.txt", (message + Environment.NewLine))
+    member public this.``BuildMacroValues`` () =
 
         DoWithTempFile "MyAssembly.fsproj" (fun file ->
 
@@ -499,7 +497,7 @@ type Miscellaneous() =
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>3</WarningLevel>
-  </PropertyGroup>", fun project configChangeNotifier projFile -> 
+  </PropertyGroup>", fun project _ projFile -> 
             let projFileText = File.ReadAllText(projFile)
             // We need to add text _after_ the import of Microsoft.FSharp.Targets.  
             let i = projFileText.IndexOf("<Import Project=")

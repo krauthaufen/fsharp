@@ -220,7 +220,6 @@ type OperatorsModule2() =
         Assert.AreEqual([|1..50|], Array.sort arr)
         
         // without lock
-        let syncRoot = System.Object()
         let k = ref 0
         let comp _ = async { do incr k
                              do! Async.Sleep (10)
@@ -295,7 +294,6 @@ type OperatorsModule2() =
     [<Fact>]
     member _.nan() =
         // value type
-        let result = Operators.nan
         Assert.AreEqual(System.Double.NaN, nan)
         
     [<Fact>]
@@ -962,7 +960,6 @@ type OperatorsModule2() =
     member _.unativeint() =
         // int
         let result = Operators.unativeint 100
-        let x: unativeint = 12un
         Assert.AreEqual(100un, result)
         
         // double

@@ -145,7 +145,6 @@ let ``Test multi project 1 basic`` () =
 let ``Test multi project 1 all symbols`` () = 
 
     let p1A = checker.ParseAndCheckProject(Project1A.options) |> Async.RunSynchronously
-    let p1B = checker.ParseAndCheckProject(Project1B.options) |> Async.RunSynchronously
     let mp = checker.ParseAndCheckProject(MultiProject1.options) |> Async.RunSynchronously
 
     let x1FromProject1A = 
@@ -183,7 +182,6 @@ let ``Test multi project 1 all symbols`` () =
 let ``Test multi project 1 xmldoc`` () = 
 
     let p1A = checker.ParseAndCheckProject(Project1A.options) |> Async.RunSynchronously
-    let p1B = checker.ParseAndCheckProject(Project1B.options) |> Async.RunSynchronously
     let mp = checker.ParseAndCheckProject(MultiProject1.options) |> Async.RunSynchronously
 
     let symbolFromProject1A sym = 
@@ -344,11 +342,6 @@ let ``Test ManyProjectsStressTest all symbols`` () =
     let projectsResults = [ for p in ManyProjectsStressTest.projects -> p, checker.ParseAndCheckProject(p.Options) |> Async.RunSynchronously ]
     let jointProjectResults = checker.ParseAndCheckProject(ManyProjectsStressTest.jointProject.Options) |> Async.RunSynchronously
 
-    let vsFromJointProject = 
-        [ for s in jointProjectResults.GetAllUsesOfAllSymbols() do
-             if  s.Symbol.DisplayName = "v" then 
-                 yield s.Symbol ]   
-
     for (p,pResults) in projectsResults do 
         let vFromProject = 
             [ for s in pResults.GetAllUsesOfAllSymbols() do
@@ -430,7 +423,7 @@ let ``Test multi project symbols should pick up changes in dependent projects`` 
 
     count.Value |> shouldEqual 1
 
-    let backgroundParseResults1, backgroundTypedParse1 = 
+    let _, backgroundTypedParse1 = 
         checker.GetBackgroundCheckResultsForFileInProject(MultiProjectDirty1.fileName1, proj1options) 
         |> Async.RunSynchronously    
 
@@ -488,7 +481,7 @@ let ``Test multi project symbols should pick up changes in dependent projects`` 
     let wholeProjectResults1AfterChange1 = checker.ParseAndCheckProject(proj1options) |> Async.RunSynchronously
     count.Value |> shouldEqual 3
 
-    let backgroundParseResults1AfterChange1, backgroundTypedParse1AfterChange1 = 
+    let _, backgroundTypedParse1AfterChange1 = 
         checker.GetBackgroundCheckResultsForFileInProject(MultiProjectDirty1.fileName1, proj1options) 
         |> Async.RunSynchronously    
 
@@ -545,7 +538,7 @@ let ``Test multi project symbols should pick up changes in dependent projects`` 
 
     count.Value |> shouldEqual 6 // the project is already checked
 
-    let backgroundParseResults1AfterChange2, backgroundTypedParse1AfterChange2 = 
+    let _, backgroundTypedParse1AfterChange2 = 
         checker.GetBackgroundCheckResultsForFileInProject(MultiProjectDirty1.fileName1, proj1options) 
         |> Async.RunSynchronously    
 
@@ -755,9 +748,7 @@ let ``Test multi project 3 whole project errors`` () =
 
 [<Test>]
 let ``Test active patterns' XmlDocSig declared in referenced projects`` () =
-
-    let wholeProjectResults = checker.ParseAndCheckProject(MultiProject3.options) |> Async.RunSynchronously
-    let backgroundParseResults1, backgroundTypedParse1 = 
+    let _, backgroundTypedParse1 = 
         checker.GetBackgroundCheckResultsForFileInProject(MultiProject3.fileName1, MultiProject3.options) 
         |> Async.RunSynchronously    
 
@@ -786,12 +777,12 @@ let ``Test max memory gets triggered`` () =
     let checker = FSharpChecker.Create()
     let reached = ref false 
     checker.MaxMemoryReached.Add (fun () -> reached := true)
-    let wholeProjectResults = checker.ParseAndCheckProject(MultiProject3.options) |> Async.RunSynchronously
+    checker.ParseAndCheckProject(MultiProject3.options) |> Async.RunSynchronously |> ignore
     reached.Value |> shouldEqual false
     checker.MaxMemory <- 0
-    let wholeProjectResults2 = checker.ParseAndCheckProject(MultiProject3.options) |> Async.RunSynchronously
+    checker.ParseAndCheckProject(MultiProject3.options) |> Async.RunSynchronously |> ignore
     reached.Value |> shouldEqual true
-    let wholeProjectResults3 = checker.ParseAndCheckProject(MultiProject3.options) |> Async.RunSynchronously
+    checker.ParseAndCheckProject(MultiProject3.options) |> Async.RunSynchronously |> ignore
     reached.Value |> shouldEqual true
 
 

@@ -130,10 +130,10 @@ type StringModule() =
 
     [<Fact>]
     member this.Filter() =
-        let e1 = String.filter (fun c -> true) "Taradiddle"
+        let e1 = String.filter (fun _ -> true) "Taradiddle"
         Assert.AreEqual("Taradiddle", e1)
 
-        let e2 = String.filter (fun c -> true) null 
+        let e2 = String.filter (fun _ -> true) null 
         Assert.AreEqual("", e2)
 
         let e3 = String.filter Char.IsUpper "How Vexingly Quick Daft Zebras Jump!"
@@ -154,24 +154,24 @@ type StringModule() =
         let e1 = String.collect (fun c -> "a"+string c) "foo"
         Assert.AreEqual("afaoao", e1)
 
-        let e2 = String.collect (fun c -> null) "hello"
+        let e2 = String.collect (fun _ -> null) "hello"
         Assert.AreEqual("", e2)
 
-        let e3 = String.collect (fun c -> "") null 
+        let e3 = String.collect (fun _ -> "") null 
         Assert.AreEqual("", e3)
 
     [<Fact>]
     member this.Init() =
-        let e1 = String.init 0 (fun i -> "foo")
+        let e1 = String.init 0 (fun _ -> "foo")
         Assert.AreEqual("", e1)
 
         let e2 = String.init 2 (fun i -> "foo"+string(i))
         Assert.AreEqual("foo0foo1", e2)
 
-        let e3 = String.init 2 (fun i -> null)
+        let e3 = String.init 2 (fun _ -> null)
         Assert.AreEqual("", e3)
 
-        CheckThrowsArgumentException(fun () -> String.init -1 (fun c -> "") |> ignore)
+        CheckThrowsArgumentException(fun () -> String.init -1 (fun _ -> "") |> ignore)
 
     [<Fact>]
     member this.Replicate() = 
@@ -215,39 +215,39 @@ type StringModule() =
 
     [<Fact>]
     member this.Forall() = 
-        let e1 = String.forall (fun c -> true) ""
+        let e1 = String.forall (fun _ -> true) ""
         Assert.AreEqual(true, e1)
 
         let e2 = String.forall (fun c -> c='o') "foo"
         Assert.AreEqual(false, e2)
 
-        let e3 = String.forall (fun c -> true) "foo"
+        let e3 = String.forall (fun _ -> true) "foo"
         Assert.AreEqual(true, e3)
 
-        let e4 = String.forall (fun c -> false) "foo"
+        let e4 = String.forall (fun _ -> false) "foo"
         Assert.AreEqual(false, e4)
 
-        let e5 = String.forall (fun c -> true) (String.replicate 1000000 "x")
+        let e5 = String.forall (fun _ -> true) (String.replicate 1000000 "x")
         Assert.AreEqual(true, e5)
 
-        let e6 = String.forall (fun c -> false) null 
+        let e6 = String.forall (fun _ -> false) null 
         Assert.AreEqual(true, e6)
 
     [<Fact>]
     member this.Exists() = 
-        let e1 = String.exists (fun c -> true) ""
+        let e1 = String.exists (fun _ -> true) ""
         Assert.AreEqual(false, e1)
 
         let e2 = String.exists (fun c -> c='o') "foo"
         Assert.AreEqual(true, e2)
 
-        let e3 = String.exists (fun c -> true) "foo"
+        let e3 = String.exists (fun _ -> true) "foo"
         Assert.AreEqual(true, e3)
 
-        let e4 = String.exists (fun c -> false) "foo"
+        let e4 = String.exists (fun _ -> false) "foo"
         Assert.AreEqual(false, e4)
 
-        let e5 = String.exists (fun c -> false) (String.replicate 1000000 "x")
+        let e5 = String.exists (fun _ -> false) (String.replicate 1000000 "x")
         Assert.AreEqual(false, e5)
 
     [<Fact>]

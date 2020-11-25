@@ -124,7 +124,7 @@ type RoundTrip() =
             | e when obj.ReferenceEquals(e,ex) -> Assert.Fail("did not expect to succeed creating project")
             | :? InvalidOperationException as e when e.ToString().Contains("rendered") ->
                 printfn "As expected, failed to create project.  Reason: %s" (e.Message)
-            | e -> Assert.Fail("failed to create project, but for wrong reason")
+            | _ -> Assert.Fail("failed to create project, but for wrong reason")
             ()
         )
 

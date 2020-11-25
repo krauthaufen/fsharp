@@ -165,12 +165,12 @@ type internal HistoryBuffer() =
     let lines   = new System.Collections.Generic.List<string>()    
     let mutable pointer = 0
     member this.Add(text:string)        = lines.Add(text); pointer <- lines.Count
-    member this.CycleUp(text:string)    = if pointer-1 >= 0 then
+    member this.CycleUp(_:string)    = if pointer-1 >= 0 then
                                             pointer <- pointer - 1
                                             Some lines.[pointer]
                                           else
                                             None
-    member this.CycleDown(text:string)  = if pointer+1 < lines.Count then
+    member this.CycleDown(_:string)  = if pointer+1 < lines.Count then
                                             pointer <- pointer + 1
                                             Some lines.[pointer]
                                           else

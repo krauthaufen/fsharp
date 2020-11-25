@@ -43,7 +43,7 @@ type UsingMSBuild() as this =
             yield error]
     
     let CheckErrorList (content : string) f : unit = 
-        let (_, project, file) = this.CreateSingleFileProject(content)
+        let (_, project, _) = this.CreateSingleFileProject(content)
         Build(project) |> ignore
 
         TakeCoffeeBreak(this.VS)
@@ -77,7 +77,7 @@ type UsingMSBuild() as this =
 
     //verify the error list Count
     member private this.VerifyErrorListCountAtOpenProject(fileContents : string, num : int) =
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents)
+        let (_, project, _) = this.CreateSingleFileProject(fileContents)
         let errorList = GetErrors(project)
         let errorTexts = new System.Text.StringBuilder()
         for error in errorList do
@@ -95,7 +95,7 @@ type UsingMSBuild() as this =
 
     //Verify the warning list Count
     member private this.VerifyWarningListCountAtOpenProject(fileContents : string, expectedNum : int, ?addtlRefAssy : list<string>) = 
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
+        let (_, project, _) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
         
         TakeCoffeeBreak(this.VS) // Wait for the background compiler to catch up.
         let warnList = GetWarnings(project)
@@ -103,7 +103,7 @@ type UsingMSBuild() as this =
 
     //verify no the error list 
     member private this.VerifyNoErrorListAtOpenProject(fileContents : string, ?addtlRefAssy : list<string>) = 
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
+        let (_, project, _) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
         
         TakeCoffeeBreak(this.VS) // Wait for the background compiler to catch up.
         let errorList = GetErrors(project)      
@@ -114,7 +114,7 @@ type UsingMSBuild() as this =
     
     //Verify the error list containd the expected string
     member private this.VerifyErrorListContainedExpectedString(fileContents : string, expectedStr : string, ?addtlRefAssy : list<string>) =
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
+        let (_, project, _) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
         
         TakeCoffeeBreak(this.VS) // Wait for the background compiler to catch up.
        
@@ -154,7 +154,7 @@ let g (t : T) = t.Count()
 
     [<Test>]
     member public this.``ErrorsInScriptFile``() = 
-        let (solution, project, file) = this.CreateSingleFileProject("", fileKind = SourceFileKind.FSX)
+        let (_, project, file) = this.CreateSingleFileProject("", fileKind = SourceFileKind.FSX)
         
         let checkErrors expected = 
             let l = List.length (GetErrors project)
@@ -190,7 +190,7 @@ let g (t : T) = t.Count()
         let _ = AddFileFromTextBlob(project, "File1.fs", "namespace LineDirectives")
         let _ = AddFileFromTextBlob(project,"File2.fs", fileContents)
 
-        let file = OpenFile(project, "File1.fs")
+        let _ = OpenFile(project, "File1.fs")
         let _ = OpenFile(project,"File2.fs")
         Assert.IsFalse(Build(project).BuildSucceeded)
 
@@ -231,7 +231,7 @@ let x = query {
                 match errors with
                 | [err] ->
                     Assert.AreEqual("Invalid join relation in 'groupJoin'. Expected 'expr <op> expr', where <op> is =, =?, ?= or ?=?.", err.Message)
-                | errs -> 
+                | _ -> 
                     Assert.Fail("Unexpected content of error list")
 
     [<Test>]
@@ -248,7 +248,7 @@ let t =
                 match errors with
                 | [err] ->
                     Assert.AreEqual("The operator '?=?' cannot be resolved. Consider opening the module 'Microsoft.FSharp.Linq.NullableOperators'.", err.Message)
-                | errs -> 
+                | _ -> 
                     Assert.Fail("Unexpected content of error list")
 
     [<Test>]
@@ -265,7 +265,7 @@ let t =
                 match errors with
                 | [err] ->
                     Assert.AreEqual("The operator '?=?' cannot be resolved. Consider opening the module 'Microsoft.FSharp.Linq.NullableOperators'.", err.Message)
-                | errs -> 
+                | _ -> 
                     Assert.Fail("Unexpected content of error list")
 
 
@@ -284,7 +284,7 @@ let x =
                 match errors with
                 | [err] ->
                     Assert.AreEqual("Invalid join relation in 'join'. Expected 'expr <op> expr', where <op> is =, =?, ?= or ?=?.", err.Message)
-                | errs -> 
+                | _ -> 
                     Assert.Fail("Unexpected content of error list")
 
     [<Test>]
@@ -407,7 +407,7 @@ type staticInInterface =
         let checkList n = 
             printfn "===TypeProvider.MultipleErrors: %d===" n
             let content = sprintf "type Err = TPErrors.TP<%d>" n
-            let (solution, project, file) = this.CreateSingleFileProject(content, references = [tpRef])
+            let (_, project, _) = this.CreateSingleFileProject(content, references = [tpRef])
             TakeCoffeeBreak(this.VS)
             let errorList = GetErrors(project)
 
@@ -564,7 +564,7 @@ but here has type
             let fn x = 0
             let y = fn 1"""
         // Turn off the "Obsolete" warning.
-        let (solution, project, file) = this.CreateSingleFileProject(fileContent, disabledWarnings = ["44"])
+        let (_, project, _) = this.CreateSingleFileProject(fileContent, disabledWarnings = ["44"])
 
         TakeCoffeeBreak(this.VS) // Wait for the background compiler to catch up.
         let errorList = GetErrors(project)
@@ -579,8 +579,8 @@ but here has type
         let _ = AddFileFromTextBlob(project,"新規baProgram.fsi","")       
         let _ = AddFileFromTextBlob(project,"新規bcrogram.fs","")
 
-        let file = OpenFile(project,"新規baProgram.fsi")  
-        let file = OpenFile(project,"新規bcrogram.fs") 
+        let _ = OpenFile(project,"新規baProgram.fsi")  
+        let _ = OpenFile(project,"新規bcrogram.fs") 
 
         Assert.IsFalse(Build(project).BuildSucceeded)
         Assert.IsTrue(GetErrors(project) 
@@ -606,8 +606,8 @@ but here has type
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
         SetVersionFile(project,"nonexistent")
-        let file = AddFileFromText(project,"File1.fs",["#light"])
-        let file = OpenFile(project,"File1.fs")            
+        let _ = AddFileFromText(project,"File1.fs",["#light"])
+        let _ = OpenFile(project,"File1.fs")            
         TakeCoffeeBreak(this.VS) // Wait for the background compiler to catch up.
         VerifyErrorListContainedExpectedStr("nonexistent",project)
 
@@ -752,9 +752,9 @@ but here has type
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
         let _ = AddFileFromTextBlob(project,"File1.fs",fileContents1)
-        let file1 = OpenFile(project,"File1.fs")
+        let _ = OpenFile(project,"File1.fs")
         let _ = AddFileFromTextBlob(project,"File2.fs",fileContents2)
-        let file2 = OpenFile(project,"File2.fs")
+        let _ = OpenFile(project,"File2.fs")
         //this.VerifyErrorListNumberAtOpenProject
         this.VerifyCountAtSpecifiedFile(project,1)
         TakeCoffeeBreak(this.VS)
@@ -918,7 +918,7 @@ but here has type
             open System
             mixin mixin mixin mixin mixin mixin mixin mixin mixin mixin
             mixin mixin mixin mixin mixin mixin mixin mixin mixin mixin"""
-        let (_, project, file) = this.CreateSingleFileProject(fileContent, fileKind = SourceFileKind.FSX)
+        let (_, project, _) = this.CreateSingleFileProject(fileContent, fileKind = SourceFileKind.FSX)
         TakeCoffeeBreak(this.VS) // Wait for the background compiler to catch up.
         let warnList = GetWarnings(project)
         Assert.AreEqual(20,warnList.Length)
@@ -929,7 +929,7 @@ but here has type
             open System
             //mixin mixin mixin mixin mixin mixin mixin mixin mixin mixin
             //mixin mixin mixin mixin mixin mixin mixin mixin mixin mixin"""
-        let (_, project, file) = this.CreateSingleFileProject(fileContent, fileKind = SourceFileKind.FSX)
+        let (_, project, _) = this.CreateSingleFileProject(fileContent, fileKind = SourceFileKind.FSX)
         TakeCoffeeBreak(this.VS) // Wait for the background compiler to catch up.
         let warnList = GetWarnings(project)
         Assert.AreEqual(0,warnList.Length)
@@ -942,7 +942,7 @@ but here has type
                 let mutable m_age = (fun () -> x)
             #nowarn "47"
             """
-        let (_, project, file) = this.CreateSingleFileProject(fileContent)
+        let (_, project, _) = this.CreateSingleFileProject(fileContent)
 
         Assert.IsTrue(Build(project).BuildSucceeded)
         TakeCoffeeBreak(this.VS)

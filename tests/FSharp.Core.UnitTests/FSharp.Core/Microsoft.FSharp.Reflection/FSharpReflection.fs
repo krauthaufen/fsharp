@@ -123,9 +123,6 @@ type FSharpValueTests() =
     let structTuple2 = struct ( 2, "tuple2", (fun x -> x + 1))
     let structTuple3 = struct ( 1, struct ( 2, "tuple"))
     
-    let func1  param  = param + 1
-    let func2  param  = param + ""
-    
     let exInt = ExceptionInt(1)
     let exDataless = DatalessException
  
@@ -270,11 +267,9 @@ type FSharpValueTests() =
     [<Fact>]
     member __.GetRecordFields() =
         // Record
-        let propertyinfo1 = (typeof<RecordType>).GetProperty("field1")
         Assert.AreEqual((FSharpValue.GetRecordFields(record1)).[0], "field1")
         
         // Generic Record value
-        let propertyinfo2 = (typeof<GenericRecordType<string, int>>).GetProperty("field1")
         Assert.AreEqual((FSharpValue.GetRecordFields(genericRecordType1)).[0], "field1")
         
         // null value
@@ -286,7 +281,6 @@ type FSharpValueTests() =
     
     [<Fact>]
     member __.GetStructRecordFields() =
-        let propertyinfo1 = (typeof<StructRecordType>).GetProperty("field1")
         Assert.AreEqual((FSharpValue.GetRecordFields(structRecord1)).[0], "field1")
         
     [<Fact>]
@@ -344,11 +338,11 @@ type FSharpValueTests() =
     [<Fact>]
     member __.GetUnionFields() =
         // single case union  
-        let (singlecaseinfo, singlevaluearray) = FSharpValue.GetUnionFields(singleCaseUnion1, typeof<SingleCaseDiscUnion>)
+        let (_, singlevaluearray) = FSharpValue.GetUnionFields(singleCaseUnion1, typeof<SingleCaseDiscUnion>)
         Assert.AreEqual(singlevaluearray, ([|1.0;2.0;3.0|] : obj []))
         
         // DiscUnionType
-        let (duCaseinfo, duValueArray) = FSharpValue.GetUnionFields(discUnionCaseB, typeof<DiscUnionType<int>>)
+        let (_, duValueArray) = FSharpValue.GetUnionFields(discUnionCaseB, typeof<DiscUnionType<int>>)
         Assert.AreEqual(duValueArray.[0], 1)
                 
         // null value
@@ -453,7 +447,7 @@ type FSharpValueTests() =
         Assert.AreEqual(resultSingleCaseUnion, singleCaseStructUnion1)
         
         // DiscUnionType
-        let (duCaseinfo, duValueArray) = FSharpValue.GetUnionFields(discStructUnionCaseB, typeof<DiscStructUnionType<int>>)
+        let (duCaseinfo, _) = FSharpValue.GetUnionFields(discStructUnionCaseB, typeof<DiscStructUnionType<int>>)
         FSharpValue.MakeUnion(duCaseinfo, [| box 1|]) |> ignore
         
     [<Fact>]
@@ -738,12 +732,12 @@ type FSharpValueTests() =
     member __.PreComputeUnionReader() =
     
         // SingleCaseUnion
-        let (singlecaseinfo, singlevaluearray) = FSharpValue.GetUnionFields(singleCaseUnion1, typeof<SingleCaseDiscUnion>)
+        let (singlecaseinfo, _) = FSharpValue.GetUnionFields(singleCaseUnion1, typeof<SingleCaseDiscUnion>)
         let singlecaseUnionReader = FSharpValue.PreComputeUnionReader(singlecaseinfo)    
         Assert.AreEqual(singlecaseUnionReader(box(singleCaseUnion1)), [| box 1.0; box 2.0; box 3.0|])
         
         // DiscUnion
-        let (discUnionInfo, discvaluearray) = FSharpValue.GetUnionFields(discUnionRecCaseB, typeof<DiscUnionType<int>>)
+        let (discUnionInfo, _) = FSharpValue.GetUnionFields(discUnionRecCaseB, typeof<DiscUnionType<int>>)
         let discUnionReader = FSharpValue.PreComputeUnionReader(discUnionInfo)    
         Assert.AreEqual(discUnionReader(box(discUnionRecCaseB)) , [| box 1; box(Some(discUnionCaseB)) |])
 
@@ -769,12 +763,12 @@ type FSharpValueTests() =
     member __.PreComputeStructUnionReader() =
     
         // SingleCaseUnion
-        let (singlecaseinfo, singlevaluearray) = FSharpValue.GetUnionFields(singleCaseStructUnion1, typeof<SingleCaseDiscStructUnion>)
+        let (singlecaseinfo, _) = FSharpValue.GetUnionFields(singleCaseStructUnion1, typeof<SingleCaseDiscStructUnion>)
         let singlecaseUnionReader = FSharpValue.PreComputeUnionReader(singlecaseinfo)    
         Assert.AreEqual(singlecaseUnionReader(box(singleCaseStructUnion1)), [| box 1.0; box 2.0; box 3.0|])
         
         // DiscUnion
-        let (discUnionInfo, discvaluearray) = FSharpValue.GetUnionFields(discStructUnionCaseB, typeof<DiscStructUnionType<int>>)
+        let (discUnionInfo, _) = FSharpValue.GetUnionFields(discStructUnionCaseB, typeof<DiscStructUnionType<int>>)
         let discUnionReader = FSharpValue.PreComputeUnionReader(discUnionInfo)    
         Assert.AreEqual(discUnionReader(box(discStructUnionCaseB)) , [| box 1|])
 
@@ -874,12 +868,8 @@ type FSharpTypeTests() =
     let fsharpdelegate1 = new FSharpDelegate(fun (x:int) -> "delegate1")
     let fsharpdelegate2 = new FSharpDelegate(fun (x:int) -> "delegate2")
     
-    
     let tuple1 = ( 1, "tuple1")
     let tuple2 = ( 2, "tuple2")
-    
-    let func1  param  = param + 1
-    let func2  param  = param + ""
     
     let exInt = ExceptionInt(1)
     let exDataless = DatalessException
@@ -988,12 +978,12 @@ type FSharpTypeTests() =
     member __.GetUnionCases() =    
         // SingleCaseUnion
         let singlecaseUnionCaseInfoArray = FSharpType.GetUnionCases(typeof<SingleCaseDiscUnion>)  
-        let (expectedSinglecaseinfo, singlevaluearray) = FSharpValue.GetUnionFields(singlecaseunion1, typeof<SingleCaseDiscUnion>)
+        let (expectedSinglecaseinfo, _) = FSharpValue.GetUnionFields(singlecaseunion1, typeof<SingleCaseDiscUnion>)
         Assert.AreEqual(singlecaseUnionCaseInfoArray.[0], expectedSinglecaseinfo)
         
         // DiscUnionType
         let discunionCaseInfoArray = FSharpType.GetUnionCases(typeof<DiscUnionType<int>>) 
-        let (expectedDuCaseinfoArray, duValueArray) = FSharpValue.GetUnionFields(discUniontypeB, typeof<DiscUnionType<int>>)
+        let (expectedDuCaseinfoArray, _) = FSharpValue.GetUnionFields(discUniontypeB, typeof<DiscUnionType<int>>)
         Assert.AreEqual(discunionCaseInfoArray.[1], expectedDuCaseinfoArray)
         
          // null value
@@ -1155,7 +1145,7 @@ type UnionCaseInfoTests() =
     let singlenullarycaseunion = SingleNullaryCaseDiscUnion.SingleNullaryCaseTag
 
     let singlecaseunion1 = SingleCaseDiscUnion.SingleCaseTag(1.0, 2.0, 3.0)
-    let singlecaseunion2 = SingleCaseDiscUnion.SingleCaseTag(4.0, 5.0, 6.0)
+    let _ = SingleCaseDiscUnion.SingleCaseTag(4.0, 5.0, 6.0)
     
     let discUniontypeA = DiscUnionType<int>.A
     let discUniontypeB = DiscUnionType<int>.B(1, Some(discUniontypeA))
@@ -1163,15 +1153,15 @@ type UnionCaseInfoTests() =
     
     let recDiscUniontypeB = DiscUnionType<int>.B(1, Some(discUniontypeB))
     
-    let ((singlenullarycaseinfo:UnionCaseInfo), singlenullaryvaluearray) = FSharpValue.GetUnionFields(singlenullarycaseunion, typeof<SingleNullaryCaseDiscUnion>)
+    let ((singlenullarycaseinfo:UnionCaseInfo), _) = FSharpValue.GetUnionFields(singlenullarycaseunion, typeof<SingleNullaryCaseDiscUnion>)
 
-    let ((singlecaseinfo:UnionCaseInfo), singlevaluearray) = FSharpValue.GetUnionFields(singlecaseunion1, typeof<SingleCaseDiscUnion>)
+    let ((singlecaseinfo:UnionCaseInfo), _) = FSharpValue.GetUnionFields(singlecaseunion1, typeof<SingleCaseDiscUnion>)
     
-    let ((discUnionInfoA:UnionCaseInfo), discvaluearray) = FSharpValue.GetUnionFields(discUniontypeA, typeof<DiscUnionType<int>>)
-    let ((discUnionInfoB:UnionCaseInfo), discvaluearray) = FSharpValue.GetUnionFields(discUniontypeB, typeof<DiscUnionType<int>>)
-    let ((discUnionInfoC:UnionCaseInfo), discvaluearray) = FSharpValue.GetUnionFields(discUniontypeC, typeof<DiscUnionType<float>>)
+    let ((discUnionInfoA:UnionCaseInfo), _) = FSharpValue.GetUnionFields(discUniontypeA, typeof<DiscUnionType<int>>)
+    let ((discUnionInfoB:UnionCaseInfo), _) = FSharpValue.GetUnionFields(discUniontypeB, typeof<DiscUnionType<int>>)
+    let ((_:UnionCaseInfo), _) = FSharpValue.GetUnionFields(discUniontypeC, typeof<DiscUnionType<float>>)
     
-    let ((recDiscCaseinfo:UnionCaseInfo), recDiscCasevaluearray) = FSharpValue.GetUnionFields(recDiscUniontypeB, typeof<DiscUnionType<int>>)
+    let ((recDiscCaseinfo:UnionCaseInfo), _) = FSharpValue.GetUnionFields(recDiscUniontypeB, typeof<DiscUnionType<int>>)
     
     [<Fact>]
     member __.Equals() =   

@@ -464,16 +464,8 @@ let ``item is consistent`` () =
     smallerSizeCheck item<string>
     smallerSizeCheck item<NormalFloat>
 
-let iter<'a when 'a : equality> (xs : 'a []) f' =
+let iter<'a when 'a : equality> (xs : 'a []) =
     let list = System.Collections.Generic.List<'a>()
-    let f x =
-        list.Add x
-        f' x
-
-    let s = xs |> Seq.iter f
-    let l = xs |> List.ofArray |> List.iter f
-    let a =  xs |> Array.iter f
-
     let xs = Seq.toList xs
     list |> Seq.toList = (xs @ xs @ xs)
 
@@ -483,18 +475,8 @@ let ``iter looks at every element exactly once and in order - consistenly over a
     smallerSizeCheck iter<string>
     smallerSizeCheck iter<NormalFloat>
 
-let iter2<'a when 'a : equality> (xs' : ('a*'a) []) f' =
-    let xs = xs' |> Array.map fst
-    let xs2 = xs' |> Array.map snd
+let iter2<'a when 'a : equality> (xs' : ('a*'a) []) =
     let list = System.Collections.Generic.List<'a*'a>()
-    let f x y =
-        list.Add <| (x,y)
-        f' x y
-
-    let s = Seq.iter2 f xs xs2
-    let l = List.iter2 f (xs |> List.ofArray) (xs2 |> List.ofArray)
-    let a = Array.iter2 f xs xs2
-
     let xs = Seq.toList xs'
     list |> Seq.toList = (xs @ xs @ xs)
 
@@ -504,18 +486,9 @@ let ``iter2 looks at every element exactly once and in order - consistenly over 
     smallerSizeCheck iter2<string>
     smallerSizeCheck iter2<NormalFloat>
 
-let iteri<'a when 'a : equality> (xs : 'a []) f' =
+let iteri<'a when 'a : equality> (xs : 'a []) =
     let list = System.Collections.Generic.List<'a>()
     let indices = System.Collections.Generic.List<int>()
-    let f i x =
-        list.Add x
-        indices.Add i
-        f' i x
-
-    let s = xs |> Seq.iteri f
-    let l = xs |> List.ofArray |> List.iteri f
-    let a =  xs |> Array.iteri f
-
     let xs = Seq.toList xs
     list |> Seq.toList = (xs @ xs @ xs) &&
       indices |> Seq.toList = ([0..xs.Length-1] @ [0..xs.Length-1] @ [0..xs.Length-1])
@@ -526,19 +499,9 @@ let ``iteri looks at every element exactly once and in order - consistenly over 
     smallerSizeCheck iteri<string>
     smallerSizeCheck iteri<NormalFloat>
 
-let iteri2<'a when 'a : equality> (xs' : ('a*'a) []) f' =
-    let xs = xs' |> Array.map fst
-    let xs2 = xs' |> Array.map snd
+let iteri2<'a when 'a : equality> (xs' : ('a*'a) []) =
     let list = System.Collections.Generic.List<'a*'a>()
     let indices = System.Collections.Generic.List<int>()
-    let f i x y =
-        list.Add <| (x,y)
-        indices.Add i
-        f' x y
-
-    let s = Seq.iteri2 f xs xs2
-    let l = List.iteri2 f (xs |> List.ofArray) (xs2 |> List.ofArray)
-    let a = Array.iteri2 f xs xs2
 
     let xs = Seq.toList xs'
     list |> Seq.toList = (xs @ xs @ xs) &&
@@ -609,9 +572,9 @@ let ``map2 looks at every element exactly once and in order - consistenly over a
     smallerSizeCheck map2<NormalFloat>
 
 let map3<'a when 'a : equality> (xs' : ('a*'a*'a) []) f' =
-    let xs = xs' |> Array.map  (fun (x,y,z) -> x)
-    let xs2 = xs' |> Array.map (fun (x,y,z) -> y)
-    let xs3 = xs' |> Array.map (fun (x,y,z) -> z)
+    let xs = xs' |> Array.map  (fun (x,_,_) -> x)
+    let xs2 = xs' |> Array.map (fun (_,y,_) -> y)
+    let xs3 = xs' |> Array.map (fun (_,_,z) -> z)
     let list = System.Collections.Generic.List<'a*'a*'a>()
     let f x y z =
         list.Add <| (x,y,z)
@@ -1291,9 +1254,9 @@ let ``zip is consistent for collections with equal length`` () =
     smallerSizeCheck zip<NormalFloat>
 
 let zip3<'a when 'a : equality> (xs':('a*'a*'a) []) =    
-    let xs = Array.map (fun (x,y,z) -> x) xs'
-    let xs2 = Array.map (fun (x,y,z) -> y) xs'
-    let xs3 = Array.map (fun (x,y,z) -> z) xs'
+    let xs = Array.map (fun (x,_,_) -> x) xs'
+    let xs2 = Array.map (fun (_,y,_) -> y) xs'
+    let xs3 = Array.map (fun (_,_,z) -> z) xs'
     let s = runAndCheckErrorType (fun () -> Seq.zip3 xs xs2 xs3 |> Seq.toArray)
     let l = runAndCheckErrorType (fun () -> List.zip3 (List.ofSeq xs) (List.ofSeq xs2) (List.ofSeq xs3) |> List.toArray)
     let a = runAndCheckErrorType (fun () -> Array.zip3 (Array.ofSeq xs) (Array.ofSeq xs2) (Array.ofSeq xs3))

@@ -42,7 +42,7 @@ type Config() =
     member this.TargetPlatform () =
         this.MakeProjectAndDoWithProjectFileAndConfigChangeNotifier(["foo.fs"], [], 
             this.MSBuildProjectMulitplatBoilerplate "Library",  
-            (fun project ccn projFileName ->
+            (fun project ccn _ ->
                 ccn((project :> IVsHierarchy), "Debug|x86")
                 project.ComputeSourcesAndFlags()
                 let flags = project.CompilationOptions |> List.ofArray

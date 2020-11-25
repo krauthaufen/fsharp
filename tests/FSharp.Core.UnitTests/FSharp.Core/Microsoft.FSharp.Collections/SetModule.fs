@@ -22,10 +22,7 @@ type SetModule() =
     [<Fact>]
     member this.Empty() =
         let emptySet = Set.empty
-        if Set.count emptySet <> 0 then Assert.Fail()    
-        
-        let c : Set<int>    = Set.empty
-        let d : Set<string> = Set.empty
+        if Set.count emptySet <> 0 then Assert.Fail()
         ()
 
     [<Fact>]
@@ -162,7 +159,7 @@ type SetModule() =
         
         let letNumPairs = new Set<string * int>([("one", 1); ("two", 2); ("three", 3)])
         if Set.exists (fun (text, num) -> text = "one" && num = 1) letNumPairs <> true then Assert.Fail()
-        if Set.exists (fun (text, num) -> text = "four") letNumPairs           <> false then Assert.Fail()
+        if Set.exists (fun (text, _) -> text = "four") letNumPairs           <> false then Assert.Fail()
         ()
         
     [<Fact>]
@@ -237,7 +234,7 @@ type SetModule() =
     member this.ForAll() =
 
         let emptySet : Set<string> = Set.empty
-        let result = Set.forall (fun x -> Assert.Fail(); false) emptySet
+        let result = Set.forall (fun _ -> Assert.Fail(); false) emptySet
         if result <> true then Assert.Fail()
         
         let seta = new Set<_>( [1 .. 99] |> List.map (fun i -> i.ToString()) )
@@ -392,7 +389,7 @@ type SetModule() =
         Set.empty |> Set.iter (fun _ -> Assert.Fail())
 
         // Full set
-        let elements = [| for i = 0 to 9 do yield false |]
+        let elements = [| for _ = 0 to 9 do yield false |]
         
         let set = new Set<_>(['0' .. '9'])
         Set.iter (fun c -> let i = int c - int '0'
@@ -404,7 +401,7 @@ type SetModule() =
     member this.Parition() =
         
         // Empty
-        let resulta, resultb = Set.partition (fun (x : int) -> Assert.Fail(); false) Set.empty
+        let resulta, resultb = Set.partition (fun (_ : int) -> Assert.Fail(); false) Set.empty
         Assert.True(resulta.Count = 0 && resultb.Count = 0)
 
         // One

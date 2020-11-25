@@ -48,10 +48,11 @@ type DocumentDiagnosticAnalyzerTests()  =
         } |> Async.RunSynchronously
 
     member private this.VerifyNoErrors(fileContents: string, ?additionalFlags: string[]) =
-        let parsingOptions, _ = checker.GetParsingOptionsFromProjectOptions projectOptions
-        let additionalOptions = match additionalFlags with
-                                | None -> projectOptions
-                                | Some(flags) -> {projectOptions with OtherOptions = Array.append projectOptions.OtherOptions flags}
+        let _, _ = checker.GetParsingOptionsFromProjectOptions projectOptions
+        let _ =
+            match additionalFlags with
+            | None -> projectOptions
+            | Some(flags) -> {projectOptions with OtherOptions = Array.append projectOptions.OtherOptions flags}
 
         let errors = getDiagnostics fileContents
         Assert.AreEqual(0, errors.Length, "There should be no errors generated")

@@ -95,7 +95,7 @@ type Array3Module() =
         CheckThrowsIndexOutRangException(fun () -> Array3D.get strArr 0 0 2 |> ignore)
         
         // empty array  
-        let emptyArray = Array3D.init 0 0 0 (fun i j k -> Assert.Fail())
+        let emptyArray = Array3D.init 0 0 0 (fun _ _ _ -> Assert.Fail())
         CheckThrowsIndexOutRangException (fun () -> Array3D.get emptyArray 1 0 0 |> ignore)
         CheckThrowsIndexOutRangException (fun () -> Array3D.get emptyArray 0 1 0 |> ignore)
         CheckThrowsIndexOutRangException (fun () -> Array3D.get emptyArray 0 0 1 |> ignore)
@@ -128,11 +128,11 @@ type Array3Module() =
         
         // empty array
         let emptyArray = Array3D.create 0 0 0 0
-        Array3D.iter (fun x -> Assert.Fail()) emptyArray
+        Array3D.iter (fun _ -> Assert.Fail()) emptyArray
         
         // null array
         let nullArr : string[,,] = null
-        CheckThrowsArgumentNullException(fun () -> Array3D.iter (fun x -> Assert.Fail("Souldn't be called")) nullArr)
+        CheckThrowsArgumentNullException(fun () -> Array3D.iter (fun _ -> Assert.Fail("Souldn't be called")) nullArr)
         ()   
 
     [<Fact>]
@@ -159,7 +159,7 @@ type Array3Module() =
         
         // empty array    
         let emptyArray = Array3D.create 0 0 0 0
-        Array3D.iter (fun x -> Assert.Fail()) emptyArray
+        Array3D.iter (fun _ -> Assert.Fail()) emptyArray
         
         // null array
         let nullArr = null:string[,,]    
@@ -252,10 +252,6 @@ type Array3Module() =
         
         let resultStr = Array3D.map funStr strArr
         resultStr |> Array3D.iter (fun x -> if x <> "VALUE" then Assert.Fail())
-        
-        // empty array     
-        let eptArr = Array3D.create 0 0 0 1
-        let resultEpt = Array3D.map (fun x -> Assert.Fail()) eptArr
 
         // null array
         let nullArr = null : string[,,]    
@@ -274,19 +270,15 @@ type Array3Module() =
 
         
         // string array 
-        let strArr = Array3D.init 2 3 2(fun i j k-> "goodboy")
+        let strArr = Array3D.init 2 3 2(fun _ _ _ -> "goodboy")
         let funStr (x:int) (y:int) (z:int) (a:string) = x.ToString() + y.ToString() + z.ToString() + a.ToUpper()
         let resultStr = Array3D.mapi funStr strArr
         if resultStr <> Array3D.init 2 3 2(fun i j k-> i.ToString() + j.ToString() + k.ToString() + "GOODBOY") then 
             Assert.Fail()
         
-        // empty array     
-        let eptArr = Array3D.create 0 0 0 1
-        let resultEpt = Array3D.mapi (fun i j k x -> Assert.Fail()) eptArr
-        
         // null array
         let nullArr = null : string[,,]    
-        CheckThrowsArgumentNullException (fun () -> Array3D.mapi (fun i j k x -> Assert.Fail("shouldn't execute this")) nullArr |> ignore)  
+        CheckThrowsArgumentNullException (fun () -> Array3D.mapi (fun _ _ _ _ -> Assert.Fail("shouldn't execute this")) nullArr |> ignore)  
         () 
 
 

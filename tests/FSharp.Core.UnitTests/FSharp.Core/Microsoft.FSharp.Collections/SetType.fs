@@ -86,7 +86,6 @@ type SetType() =
     member this.ICollection() =        
         // Legit IC        
         let ic = (new Set<int>([1;2;3;4])) :> ICollection<int>
-        let st = new Set<int>([1;2;3;4])        
         
         Assert.True(ic.Contains(3)) 
         let newArr = Array.create 5 0

@@ -83,7 +83,7 @@ type MailboxProcessorType() =
         let mb =
             MailboxProcessor.Start (
                 fun inbox -> async {
-                    use disp =
+                    use __ =
                         { new IDisposable with
                             member this.Dispose () =
                                 addMsg "Disposed"
@@ -116,7 +116,7 @@ type MailboxProcessorType() =
         let mb =
             MailboxProcessor.Start (
                 fun inbox -> async {
-                    use disp =
+                    use __ =
                         { new IDisposable with
                             member this.Dispose () =
                                 addMsg "Disposed"
@@ -149,7 +149,7 @@ type MailboxProcessorType() =
         let mb =
             MailboxProcessor.Start (
                 fun inbox -> async {
-                    use disp =
+                    use _ =
                         { new IDisposable with
                             member this.Dispose () =
                                 addMsg "Disposed"
@@ -176,15 +176,15 @@ type MailboxProcessorType() =
             MailboxProcessor.Start (
                 fun inbox -> async {
                     while true do
-                        let w = receiveEv.WaitOne()
+                        let _ = receiveEv.WaitOne()
                         receiveEv.Reset() |> ignore
-                        let! (msg) = inbox.Receive ()
+                        let! (_) = inbox.Receive ()
                         finishedEv.Set() |> ignore
                 })
-        let post =
+        let _ =
             async {
                 while true do
-                    let r = postEv.WaitOne()
+                    let _ = postEv.WaitOne()
                     postEv.Reset() |> ignore
                     mb.Post(fun () -> ())
             } |> Async.Start
@@ -208,18 +208,18 @@ type MailboxProcessorType() =
             MailboxProcessor.Start (
                 fun inbox -> async {
                     while true do
-                        let w = receiveEv.WaitOne()
+                        let _ = receiveEv.WaitOne()
                         receiveEv.Reset() |> ignore
-                        let! (msg) = inbox.Receive (5000)
+                        let! (_) = inbox.Receive (5000)
                         finishedEv.Set() |> ignore
                 })
 
         let isErrored = mb.Error |> Async.AwaitEvent |> Async.StartAsTask
 
-        let post =
+        let _ =
             async {
                 while true do
-                    let r = postEv.WaitOne()
+                    let _ = postEv.WaitOne()
                     postEv.Reset() |> ignore
                     mb.Post(fun () -> ())
             } |> Async.Start
@@ -247,18 +247,18 @@ type MailboxProcessorType() =
             MailboxProcessor.Start (
                 fun inbox -> async {
                     while true do
-                        let w = receiveEv.WaitOne()
+                        let _ = receiveEv.WaitOne()
                         receiveEv.Reset() |> ignore
-                        let! (msg) = inbox.TryReceive (5000)
+                        let! (_) = inbox.TryReceive (5000)
                         finishedEv.Set() |> ignore
                 })
 
         let isErrored = mb.Error |> Async.AwaitEvent |> Async.StartAsTask
 
-        let post =
+        let _ =
             async {
                 while true do
-                    let r = postEv.WaitOne()
+                    let _ = postEv.WaitOne()
                     postEv.Reset() |> ignore
                     mb.Post(fun () -> ())
             } |> Async.Start

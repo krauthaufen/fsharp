@@ -118,11 +118,10 @@ type UsingMSBuild() as this  =
         "distinct"; "exists"; "find"; "all"; "head"; "nth"; "skip"; "skipWhile"; "sumBy"; "take"
         "takeWhile"; "sortByNullable"; "sortByNullableDescending"; "thenByNullable"; "thenByNullableDescending"]
 
-    let AA l = Some(System.IO.Path.Combine(System.IO.Path.GetTempPath(), ".NETFramework,Version=v4.0.AssemblyAttributes.fs")), l
     let notAA l = None,l
     let stopWatch = new System.Diagnostics.Stopwatch()
     let ResetStopWatch() = stopWatch.Reset(); stopWatch.Start()
-    let time1 op a message = 
+    let time1 op a _ = 
         ResetStopWatch()
         let result = op a
         //printf "%s %d ms\n" message stopWatch.ElapsedMilliseconds
@@ -135,7 +134,7 @@ type UsingMSBuild() as this  =
 
     // There are some dot completion tests in this type as well, in the systematic tests for queries
     member private this.VerifyDotCompListContainAllAtStartOfMarker(fileContents : string, marker : string, list :string list, ?addtlRefAssy:list<string>, ?coffeeBreak:bool) =
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
 
         //to add references
         if defaultArg coffeeBreak false then TakeCoffeeBreak(this.VS)
@@ -144,7 +143,7 @@ type UsingMSBuild() as this  =
 
     // There are some quickinfo tests in this file as well, in the systematic tests for queries
     member public this.InfoInDeclarationTestQuickInfoImpl(code : string,marker,expected,atStart, ?addtlRefAssy : list<string>) =
-        let (solution, project, file) = this.CreateSingleFileProject(code, ?references = addtlRefAssy)
+        let (_, _, file) = this.CreateSingleFileProject(code, ?references = addtlRefAssy)
 
         let gpatcc = GlobalParseAndTypeCheckCounter.StartNew(this.VS)
         if atStart then
@@ -252,20 +251,20 @@ type UsingMSBuild() as this  =
    /////Helper Functios 
         //DotCompList ContainAll At End Of Marker Helper Function
     member private this.VerifyDotCompListContainAllAtEndOfMarker(fileContents : string, marker : string, list : string list) =
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents)
         let completions = DotCompletionAtEndOfMarker file marker
         AssertCompListContainsAll(completions, list)
 
         //DoesNotContainAny At Start Of Marker Helper Function 
     member private this.VerifyDotCompListDoesNotContainAnyAtStartOfMarker(fileContents : string, marker : string, list : string list, ?addtlRefAssy : list<string>) =
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
 
         let completions = DotCompletionAtStartOfMarker file marker
         AssertCompListDoesNotContainAny(completions, list)
 
         //DotCompList Is Empty At Start Of Marker Helper Function
     member private this.VerifyDotCompListIsEmptyAtStartOfMarker(fileContents : string, marker : string, ?addtlRefAssy : list<string>) =
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
 
         let completions = DotCompletionAtStartOfMarker file marker
         AssertCompListIsEmpty(completions)
@@ -793,7 +792,7 @@ for i in 0..a."]
 
         for (code, marker, should, shouldnot) in useCases do
             let code = prologue @ [code]
-            let shouldnot = shouldnot @ ["abs"]
+            let _ = shouldnot @ ["abs"]
             AssertCtrlSpaceCompleteContains code marker should ["abs"]
     
     [<Test>]
@@ -2431,7 +2430,7 @@ let x = new MyClass2(0)
        for customOperation in ["select";"skip";"contains";"groupJoin"] do
         printfn " Running systematic tests looking for completion of '%s' at multiple locations"  customOperation
         for idText in strictPrefixes customOperation do
-         for i,fileContents in this.QueryExpressionFileExamples() |> List.mapi (fun i x -> (i,x)) do
+         for _,fileContents in this.QueryExpressionFileExamples() |> List.mapi (fun i x -> (i,x)) do
            let fileContents = fileContents.Replace("(*TYPING*)",idText+"(*Marker*)")
            try 
                this.VerifyCtrlSpaceListContainAllAtStartOfMarker(
@@ -2584,7 +2583,7 @@ let aaaaaa = 0
             "NoClosingBrace,NextDefinition",      " \nlet nextDefinition () = 1\n"; 
             "NoClosingBrace,NextTypeDefinition",  " \ntype NextDefinition() = member x.P = 1\n" 
           ] 
-        let lines b = 
+        let lines _ = 
           [ "BL1",  "let f()  = seq { while abb(*C*)"                                     , [AC "(*C*)" "abbbbc"]
             "BL2",  "let f()  = seq { while abbbbc(*D1*)"                                 , [QI "while abbbbc" "val abbbbc"; DC "(*D1*)" "Length"]
             "BL3",  "let f()  = seq { while abbbbc(*D1*) do (*C*)"                        , [QI "while abbbbc" "val abbbbc"; DC "(*D1*)" "Length"; AC "(*C*)" "abbbbc"]
@@ -2626,7 +2625,7 @@ let aaaaaa = 0
             "NoClosingBrace,NextDefinition",      " \nlet nextDefinition () = 1\n"; 
             "NoClosingBrace,NextTypeDefinition",  " \ntype NextDefinition() = member x.P = 1\n" 
           ] 
-        let lines b = 
+        let lines _ = 
           [ "CL1",  "let x = query { for bbbb in abbbbc(*D0*) do join "  ,                                     [QI "for bbbb" "val bbbb"; QI "in abbbbc" "val abbbbc"; DC "(*D0*)" "Length"; QI "join" "join"]
             "CL2",  "let x = query { for bbbb in abbbbc(*D0*) do join cccc "  ,                           [QI "for bbbb" "val bbbb"; QI "in abbbbc" "val abbbbc"; DC "(*D0*)" "Length"; QI "join" "join"]
             "CL2a", "let x = query { for bbbb in abbbbc(*D0*) do join cccc )"  ,                          [QI "for bbbb" "val bbbb"; QI "in abbbbc" "val abbbbc"; DC "(*D0*)" "Length"; QI "join" "join"]
@@ -2680,7 +2679,7 @@ let aaaaaa = 0
             "NoClosingBrace,NextDefinition",      " \nlet nextDefinition () = 1\n"; 
             "NoClosingBrace,NextTypeDefinition",  " \ntype NextDefinition() = member x.P = 1\n" 
           ] 
-        let lines b = 
+        let lines _ = 
           [ "DL1",  """
 let x = query { for bbbb in abbbbc(*D0*) do 
 join 
@@ -3157,7 +3156,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
                      "    arr.[0]." ]
         let (_, _, file) = this.CreateSingleFileProject(code)
         TakeCoffeeBreak(this.VS)
-        let gpatcc = GlobalParseAndTypeCheckCounter.StartNew(this.VS)
+        let _ = GlobalParseAndTypeCheckCounter.StartNew(this.VS)
         MoveCursorToEndOfMarker(file, "arr.[0].")
         let completions = AutoCompleteAtCursor file
         AssertCompListContainsExactly(completions, []) // we don't want any completions on <expr>. when <expr> has unknown type due to errors
@@ -4390,7 +4389,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
                 <ItemGroup>
                     <Reference Include=""..\bar\nonexistent.dll"" />
                 </ItemGroup>")
-        let file = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     [    
                                         "(*marker*)  "
                                      ])
@@ -4505,14 +4504,14 @@ let x = query { for bbbb in abbbbc(*D0*) do
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
         
-        let file1 = AddFileFromText(project,"File1.fs", [""])
-        let file1 = OpenFile(project,"File1.fs")
+        let _ = AddFileFromText(project,"File1.fs", [""])
+        let _ = OpenFile(project,"File1.fs")
         //file1.
 
-        let file2 = AddFileFromText(project,"File2.fs", ["let x = 4"; "x."])
+        let _ = AddFileFromText(project,"File2.fs", ["let x = 4"; "x."])
         let file2 = OpenFile(project,"File2.fs")
 
-        let file3 = AddFileFromText(project,"File3.fs", [""])
+        let _ = AddFileFromText(project,"File3.fs", [""])
         let file3 = OpenFile(project,"File3.fs")
 
         // ensure that the incremental builder is running        
@@ -4537,7 +4536,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
         use _guard = this.UsingNewVS()
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
-        let file = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     [ 
                                      "let y = System.Deployment.Application."
                                      "()"])
@@ -4565,7 +4564,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
                 <ItemGroup>
                     <Reference Include=""System.Deployment"" Condition=""'$(Configuration)'=='Foo'"" />
                 </ItemGroup>")
-        let file = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     [ 
                                      "let y = System.Deployment.Application."
                                      "()"])
@@ -4593,7 +4592,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
                 <Reference Include=""System.Deployment"" Condition=""'$(Platform)'=='x86'"" />
             </ItemGroup>")
         SetConfigurationAndPlatform(project, "Debug|AnyCPU")
-        let file = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     [ 
                                      "let y = System.Deployment.Application."
                                      "()"])
@@ -4639,7 +4638,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
         let project = CreateProject(solution,"testproject")
         
         
-        let file = AddFileFromText(project,"File1.fs",
+        let _ = AddFileFromText(project,"File1.fs",
                                     [ 
                                      "let y = System.Deployment.Application."
                                      "()"])
@@ -4979,7 +4978,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
               | CompletionItem("Tail" as name,_,_,_,decl) -> 
                 count<-count + 1
                 AssertIsDecl(name,decl,DeclarationType.Property) 
-              | CompletionItem(name,_,_,_,x) -> ()        
+              | CompletionItem(_,_,_,_,_) -> ()        
         
         Assert.AreEqual(2,count)
         
@@ -5003,7 +5002,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
             match completion with 
               | CompletionItem("BackgroundColor" as name,_,_,_,decl) -> AssertIsDecl(name,decl,DeclarationType.Property) 
               | CompletionItem("CancelKeyEvent" as name,_,_,_,decl) -> AssertIsDecl(name,decl,DeclarationType.Event) 
-              | CompletionItem(name,_,_,_,x) -> ()
+              | CompletionItem(_,_,_,_,_) -> ()
 
     // Test completions in an incomplete computation expression (case 1: for "let")
     [<Test>]
@@ -5071,8 +5070,8 @@ let x = query { for bbbb in abbbbc(*D0*) do
         let solution = this.CreateSolution()
         let projName = "testproject"
         let project = CreateProject(solution,projName)
-        let dir = ProjectDirectory(project)
-        let file1 = AddFileFromText(project,"File1.fs", 
+        let _ = ProjectDirectory(project)
+        let _ = AddFileFromText(project,"File1.fs", 
                                     [ 
                                      "module File1"
                                      "#if COMPILED"
@@ -5081,7 +5080,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
                                      "let y = 1"
                                      "#endif"
                                     ]) 
-        let file2 = AddFileFromText(project,"File2.fs", 
+        let _ = AddFileFromText(project,"File2.fs", 
                                     [ 
                                      "module File2"
                                      "File1."
@@ -5105,7 +5104,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
         let projName = "testproject"
         let project = CreateProject(solution,projName)
         let dir = ProjectDirectory(project)
-        let file = AddFileFromText(project,"File1.fs", 
+        let _ = AddFileFromText(project,"File1.fs", 
                                     [ 
                                      "let x = 0"
                                      "let y = x."
@@ -5116,7 +5115,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
         // printf "Completions=%A\n" completions
         Assert.IsTrue(completions.Length>0)
         this.CloseSolution(solution)
-        let project,solution = OpenExistingProject(this.VS, dir, projName)
+        let project,_ = OpenExistingProject(this.VS, dir, projName)
         let file = List.item 0 (GetOpenFiles(project))
         MoveCursorToEndOfMarker(file,"x.")
         let completions = time1 AutoCompleteAtCursor file "Time of first autocomplete."
@@ -5193,27 +5192,21 @@ let x = query { for bbbb in abbbbc(*D0*) do
 
 
 //*********************************************Previous Completion test and helper*****
-    member private this.VerifyCompListDoesNotContainAnyAtStartOfMarker(fileContents : string, marker : string, list : string list) =
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents)
-        MoveCursorToStartOfMarker(file, marker)    
-        let completions = AutoCompleteAtCursor(file)
-        AssertCompListDoesNotContainAny(completions,list)
-
     member private this.VerifyCtrlSpaceListDoesNotContainAnyAtStartOfMarker(fileContents : string, marker : string, list : string list) =
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents)
         MoveCursorToStartOfMarker(file, marker)    
         let completions = CtrlSpaceCompleteAtCursor file
         AssertCompListDoesNotContainAny(completions,list)
 
     member private this.VerifyCompListContainAllAtStartOfMarker(fileContents : string, marker : string, list : string list) =
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents)
         MoveCursorToStartOfMarker(file, marker)
         let completions = AutoCompleteAtCursor(file)
         AssertCompListContainsAll(completions, list)
 
     member private this.VerifyCtrlSpaceListContainAllAtStartOfMarker(fileContents : string, marker : string, list : string list, ?coffeeBreak:bool, ?addtlRefAssy:list<string>) =
         let coffeeBreak = defaultArg coffeeBreak false
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
         MoveCursorToStartOfMarker(file, marker)
         if coffeeBreak then TakeCoffeeBreak(this.VS)
         let completions = CtrlSpaceCompleteAtCursor file
@@ -5221,13 +5214,13 @@ let x = query { for bbbb in abbbbc(*D0*) do
 
         
     member private this.VerifyAutoCompListIsEmptyAtEndOfMarker(fileContents : string, marker : string) =
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents)
         MoveCursorToEndOfMarker(file, marker)
         let completions = AutoCompleteAtCursor(file)   
         AssertEqual(0,completions.Length)              
 
     member private this.VerifyCtrlSpaceCompListIsEmptyAtEndOfMarker(fileContents : string, marker : string) =
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents)
         MoveCursorToEndOfMarker(file, marker)
         let completions = CtrlSpaceCompleteAtCursor(file)   
         AssertEqual(0,completions.Length)              
@@ -5761,7 +5754,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
             val x:int = 1
             x(*MarkerInsideaSignatureFile*)
             """
-        let (solution, project, openfile) = this.CreateSingleFileProject(fileContents, fileKind = SourceFileKind.FSI)
+        let (_, _, openfile) = this.CreateSingleFileProject(fileContents, fileKind = SourceFileKind.FSI)
 
         let completions = DotCompletionAtStartOfMarker openfile "(*MarkerInsideaSignatureFile*)"
         AssertCompListContainsAll(completions, []) // .fsi will not contain completions for this (it doesn't make sense)
@@ -5770,7 +5763,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
             let i = 1
             i(*MarkerInsideSourceFile*)
             """
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents)
         
         let completions = DotCompletionAtStartOfMarker file "(*MarkerInsideSourceFile*)"
         AssertCompListContainsAll(completions, ["CompareTo"; "Equals"])
@@ -5795,7 +5788,7 @@ let x = query { for bbbb in abbbbc(*D0*) do
             [
                 "System.Numerics"  // code uses bigint
             ]
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents, references = references)        
+        let (_, _, file) = this.CreateSingleFileProject(fileContents, references = references)        
         let completions = DotCompletionAtStartOfMarker file "(*Mupcast*)"
         AssertCompListContainsAll(completions, ["Name"; "Speak"])
         
@@ -6887,7 +6880,7 @@ let rec f l =
                 let tn = new TreeNode("")
 
                 tn.Nodes(*Marker1*)"""
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents, references = ["System.Windows.Forms"])
+        let (_, _, file) = this.CreateSingleFileProject(fileContents, references = ["System.Windows.Forms"])
 
         let completions = DotCompletionAtStartOfMarker file "(*Marker1*)"
         AssertCompListDoesNotContainAny(completions, ["Nodes"])
@@ -6928,7 +6921,7 @@ let rec f l =
    
             let type1 = typeof<int(*MarkerParamTypeof*)>
             """
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents)
 
         //Completion list Not comes up after DUType parameter
         let completions = DotCompletionAtStartOfMarker file "(*MarkerDUTypeParam*)"
@@ -7041,7 +7034,7 @@ let rec f l =
                 type testattribute() = 
                     member x.Empty = 0
                 """
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents)
 
         //Completion List----where completion list does not come up
         let completions = DotCompletionAtStartOfMarker file "(*Mattribute1*)"
@@ -7064,7 +7057,7 @@ let rec f l =
 
                 let x = "System.Console(*Minstring*)"
                 """
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents)
 
 
         // description="Completion List----where completion list does not come up
@@ -7882,10 +7875,10 @@ let rec f l =
         let solution = this.CreateSolution()
         let project = CreateProject(solution,"testproject")
         this.AddAssemblyReference(project, "System.Xml.Linq")
-        let file1 = AddFileFromTextBlob(project,"File1.fs",datacode)
+        let _ = AddFileFromTextBlob(project,"File1.fs",datacode)
         //build
-        let file2 = AddFileFromTextBlob(project,"File2.fs",fileContents)
-        let file1 = OpenFile(project,"File1.fs")
+        let _ = AddFileFromTextBlob(project,"File2.fs",fileContents)
+        let _ = OpenFile(project,"File1.fs")
         let file2 = OpenFile(project,"File2.fs")
 
         TakeCoffeeBreak(this.VS)

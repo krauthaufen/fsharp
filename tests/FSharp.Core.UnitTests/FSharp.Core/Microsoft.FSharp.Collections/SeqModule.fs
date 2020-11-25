@@ -275,7 +275,6 @@ type SeqModule() =
         VerifySeqsEqual expectedStringSeq stringSeq
         
         // empty Seq
-        let emptySeq = Seq.cast Seq.empty
         let expectedEmptySeq = Seq.empty
         
         VerifySeqsEqual expectedEmptySeq Seq.empty
@@ -291,14 +290,14 @@ type SeqModule() =
             let strings = 
                 integerArray 
                 |> Seq.cast<string>               
-            for o in strings do ()) 
+            for _ in strings do ()) 
         
         CheckThrowsExn<System.InvalidCastException>(fun () -> 
             let strings = 
                 integerArray 
                 |> Seq.cast<string>
                 :> System.Collections.IEnumerable // without this upcast the for loop throws, so it should with this upcast too
-            for o in strings do ()) 
+            for _ in strings do ()) 
         
         ()
         
@@ -328,7 +327,6 @@ type SeqModule() =
         
         // empty Seq
         let emptySeq = Seq.empty
-        let emptyChoosed = Seq.choose funcInt emptySeq
         
         let expectedEmptyChoose = Seq.empty
         
@@ -469,7 +467,7 @@ type SeqModule() =
         // Empty Seq
         let emptySeqs = seq [seq[ Seq.empty;Seq.empty];seq[ Seq.empty;Seq.empty]]
         let conEmptySeq = Seq.concat emptySeqs
-        let expectedEmptySeq =seq { for i in 1..4 do yield Seq.empty}
+        let expectedEmptySeq =seq { for _ in 1..4 do yield Seq.empty}
         
         VerifySeqsEqual expectedEmptySeq conEmptySeq   
 
@@ -772,7 +770,6 @@ type SeqModule() =
         CheckThrowsKeyNotFoundException(fun () -> Seq.findBack funcInt emptySeq |> ignore)
 
         // Not found
-        let emptySeq = Seq.empty
         CheckThrowsKeyNotFoundException(fun () -> seq { 1..20 } |> Seq.findBack (fun _ -> false) |> ignore)
 
         // null Seq
@@ -789,10 +786,10 @@ type SeqModule() =
         Assert.AreEqual(idx, 9)
 
         // empty Seq 
-        CheckThrowsKeyNotFoundException(fun () -> Seq.findIndex (fun i -> true) Seq.empty |> ignore)
+        CheckThrowsKeyNotFoundException(fun () -> Seq.findIndex (fun _ -> true) Seq.empty |> ignore)
          
         // null Seq
-        CheckThrowsArgumentNullException(fun() -> Seq.findIndex (fun i -> true) null |> ignore)
+        CheckThrowsArgumentNullException(fun() -> Seq.findIndex (fun _ -> true) null |> ignore)
         ()
     
     [<Fact>]
@@ -835,10 +832,10 @@ type SeqModule() =
         Assert.AreEqual(1, findStr)
 
         // empty Seq
-        CheckThrowsKeyNotFoundException(fun () -> Seq.findIndexBack (fun i -> true) Seq.empty |> ignore)
+        CheckThrowsKeyNotFoundException(fun () -> Seq.findIndexBack (fun _ -> true) Seq.empty |> ignore)
 
         // null Seq
-        CheckThrowsArgumentNullException(fun() -> Seq.findIndexBack (fun i -> true) null |> ignore)
+        CheckThrowsArgumentNullException(fun() -> Seq.findIndexBack (fun _ -> true) null |> ignore)
         ()
 
     [<Fact>]
@@ -849,7 +846,7 @@ type SeqModule() =
         Assert.AreEqual(result, "6")
         
         // Empty seq (Bugged, 4173)
-        CheckThrowsKeyNotFoundException (fun () -> Seq.pick (fun i -> Some('a')) ([| |] : int[]) |> ignore)
+        CheckThrowsKeyNotFoundException (fun () -> Seq.pick (fun _ -> Some('a')) ([| |] : int[]) |> ignore)
 
         // Null
         CheckThrowsArgumentNullException (fun () -> Seq.pick (fun i -> Some(i + 0)) null |> ignore)

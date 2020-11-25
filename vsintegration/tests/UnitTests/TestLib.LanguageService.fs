@@ -60,13 +60,13 @@ type internal Helper =
             let Check line col = 
                 //printfn "line=%d col=%d" line col
                 MoveCursorTo(file,line,col)
-                let tooltip = GetQuickInfoAtCursor file
-                let parameterInfo = GetParameterInfoAtCursor file
-                let squiggle = GetSquiggleAtCursor file
-                let tokenType = GetTokenTypeAtCursor file
-                let ctrlspacecompletion = CtrlSpaceCompleteAtCursor file
+                let _ = GetQuickInfoAtCursor file
+                let _ = GetParameterInfoAtCursor file
+                let _ = GetSquiggleAtCursor file
+                let _ = GetTokenTypeAtCursor file
+                let _ = CtrlSpaceCompleteAtCursor file
                 if col > 1 && lines.[line-1].[col-2] = '.' then  // -2 because, -1 to get to 0-based coords, and -1 more because want to look one char left of cursor for the dot
-                    let autocompletion = AutoCompleteAtCursor file
+                    let _ = AutoCompleteAtCursor file
                     ()
                 ()
             let lines = lines |> List.toArray
@@ -155,7 +155,7 @@ type internal Helper =
             AssertMatches regex s
             i <- regexStr.IndexOf(c, i+1)       
 
-type internal GlobalParseAndTypeCheckCounter private(initialParseCount:int, initialTypeCheckCount:int, initialEventNum:int, vs) =
+type internal GlobalParseAndTypeCheckCounter private(_initialParseCount:int, _initialTypeCheckCount:int, initialEventNum:int, vs) =
     static member StartNew(vs) =
         TakeCoffeeBreak(vs)
         let n = IncrementalBuilderEventTesting.GetCurrentIncrementalBuildEventNum()
@@ -260,12 +260,7 @@ type LanguageServiceBaseTests() =
 
     (* Timings ----------------------------------------------------------------------------- *)
     let stopWatch = new Stopwatch()
-    let ResetStopWatch() = stopWatch.Reset(); stopWatch.Start()
-    let time1 op a message = 
-        ResetStopWatch()
-        let result = op a
-        printf "%s %d ms\n" message stopWatch.ElapsedMilliseconds
-        result                         
+    let ResetStopWatch() = stopWatch.Reset(); stopWatch.Start()                  
                
     member internal this.VsOpts
         with set op = ops <- op

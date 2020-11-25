@@ -40,7 +40,7 @@ type MyLogger(f : string -> unit) =
 type FauxHostObject() =
     let mutable myFlags : string[] = null
     let mutable mySources : string[] = null
-    member x.Compile(compile:System.Func<int>, flags:string[], sources:string[]) =
+    member x.Compile(_:System.Func<int>, flags:string[], sources:string[]) =
         myFlags <- flags
         mySources <- sources
         0

@@ -41,12 +41,6 @@ type SeqModule2() =
 
     [<Fact>]
     member this.TryHead() =
-        // int Seq     
-        let IntSeq =
-            seq { for i in 0 .. 9 -> i }
-                    
-        let intResult = Seq.tryHead IntSeq
-
         // string Seq
         let strResult = Seq.tryHead (seq ["first"; "second";  "third"])
         Assert.AreEqual("first", strResult.Value)
@@ -296,7 +290,7 @@ type SeqModule2() =
         VerifySeqsEqual expectedStrSeq init_finiteStr
         
         // null Seq
-        let funcNull x = null
+        let funcNull _ = null
         let init_finiteNull = Seq.init 3 funcNull
         let expectedNullSeq = seq [ null;null;null]
         
@@ -329,12 +323,6 @@ type SeqModule2() =
         let is_emptyInt = Seq.isEmpty seqint
         
         Assert.False(is_emptyInt)
-              
-        //seq str
-        let seqStr = seq["first";"second"]
-        let is_emptyStr = Seq.isEmpty  seqStr
-
-        Assert.False(is_emptyInt)
         
         //seq empty
         let seqEmpty = Seq.empty
@@ -366,8 +354,7 @@ type SeqModule2() =
         
          // empty array    
         let emptyseq = Seq.empty
-        let resultEpt = ref 0
-        Seq.iter (fun x -> Assert.Fail()) emptyseq   
+        Seq.iter (fun _ -> Assert.Fail()) emptyseq   
 
         // null seqay
         let nullseq:seq<'a> =  null
@@ -396,8 +383,7 @@ type SeqModule2() =
         
          // empty array    
         let emptyseq = Seq.empty
-        let resultEpt = ref 0
-        Seq.iter2 (fun x y-> Assert.Fail()) emptyseq  emptyseq 
+        Seq.iter2 (fun _ _ -> Assert.Fail()) emptyseq  emptyseq 
 
         // null seqay
         let nullseq:seq<'a> =  null
@@ -456,8 +442,7 @@ type SeqModule2() =
         
         // empty seq
         let emptyseq = Seq.empty
-        let resultEpt = ref 0
-        Seq.iteri2 (fun x y z -> Assert.Fail()) emptyseq emptyseq 
+        Seq.iteri2 (fun _ _ _ -> Assert.Fail()) emptyseq emptyseq 
 
         // null seq
         let nullseq:seq<'a> =  null
@@ -746,7 +731,7 @@ type SeqModule2() =
     [<Fact>]
     member this.Map2WithSideEffects () =
         let i = ref 0
-        let f x y = i := !i + 1; x*x
+        let f x _ = i := !i + 1; x*x
         let e = (Seq.map2 f [1;2] [1;2]).GetEnumerator()
         
         CheckThrowsInvalidOperationExn  (fun _ -> e.Current|>ignore)
@@ -780,7 +765,7 @@ type SeqModule2() =
     [<Fact>]
     member this.Mapi2WithSideEffects () =
         let i = ref 0
-        let f _ x y = i := !i + 1; x*x
+        let f _ x _ = i := !i + 1; x*x
         let e = (Seq.mapi2 f [1;2] [1;2]).GetEnumerator()
 
         CheckThrowsInvalidOperationExn  (fun _ -> e.Current|>ignore)
@@ -1230,7 +1215,7 @@ type SeqModule2() =
         CheckThrowsArgumentNullException(fun() -> Seq.scanBack funcInt seqNull 5 |> ignore)
 
         // exception cases
-        let funcEx x (s:'State) = raise <| new System.FormatException() : 'State
+        let funcEx _ (_:'State) = raise <| new System.FormatException() : 'State
         // calling scanBack with funcEx does not throw
         let resultEx = Seq.scanBack funcEx (seq {1..10}) 0
         // reading from resultEx throws
@@ -1954,7 +1939,7 @@ type SeqModule2() =
        
         // null Seq
         let nullSeq : seq<'a> = null 
-        let funcNull x = Some(1)
+        let funcNull _ = Some(1)
         
         CheckThrowsArgumentNullException(fun () -> Seq.tryPick funcNull nullSeq |> ignore)
    

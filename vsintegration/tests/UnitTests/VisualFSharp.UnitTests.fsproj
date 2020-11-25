@@ -42,7 +42,6 @@
     <Compile Include="LegacyLanguageService\Tests.LanguageService.Completion.fs" />
     <Compile Include="LegacyLanguageService\Tests.LanguageService.IncrementalBuild.fs" />
     <Compile Include="LegacyLanguageService\Tests.LanguageService.GotoDefinition.fs" />
-    <Compile Include="LegacyLanguageService\Tests.LanguageService.NavigationBar.fs" />
     <Compile Include="LegacyLanguageService\Tests.LanguageService.ParameterInfo.fs" />
     <Compile Include="LegacyLanguageService\Tests.LanguageService.QuickInfo.fs" />
     <Compile Include="LegacyLanguageService\Tests.LanguageService.QuickParse.fs" />

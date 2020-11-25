@@ -71,10 +71,10 @@ type internal FsiCompletionSet(imageList,source:Source) =
 type internal FsiDeclarations(items : (string*string*string*int)[] ) =
     inherit Declarations()
     override this.GetCount()        = items.Length
-    override this.GetName(i)        = items.[i] |> (fun (n,d,dsp,g) -> n)
-    override this.GetDescription(i) = items.[i] |> (fun (n,d,dsp,g) -> d)
-    override this.GetDisplayText(i) = items.[i] |> (fun (n,d,dsp,g) -> dsp)
-    override this.GetGlyph(i:int)   = items.[i] |> (fun (n,d,dsp,g) -> g)
+    override this.GetName(i)        = items.[i] |> (fun (n,_,_,_) -> n)
+    override this.GetDescription(i) = items.[i] |> (fun (_,d,_,_) -> d)
+    override this.GetDisplayText(i) = items.[i] |> (fun (_,_,dsp,_) -> dsp)
+    override this.GetGlyph(i:int)   = items.[i] |> (fun (_,_,_,g) -> g)
     new() = new FsiDeclarations([||])
 
 // Methods
@@ -84,10 +84,10 @@ type internal FsiMethods() =
     override this.GetCount() = items.Length
     override this.GetDescription(i) = items.[i]
     override this.GetName(i) = items.[i]
-    override this.GetParameterCount(i:int) = 0
-    override this.GetParameterInfo(i,param_i,name:byref<string>,display:byref<string>,description:byref<string>) =
+    override this.GetParameterCount(_:int) = 0
+    override this.GetParameterInfo(i,_,name:byref<string>,display:byref<string>,description:byref<string>) =
         name <- items.[i]; display <- ""; description <- ""
-    override this.GetType(i:int) = null:string
+    override this.GetType(_:int) = null:string
 
 // FsiSource
 type internal FsiSource(service:LanguageService, textLines:IVsTextLines, colorizer:Colorizer) =
@@ -106,22 +106,22 @@ type internal FsiSource(service:LanguageService, textLines:IVsTextLines, coloriz
     override this.Completion(textView:IVsTextView,info:TokenInfo,reason:ParseReason) =
         base.Completion(textView,info,reason)
 
-type internal FsiScanner(buffer:IVsTextLines) =
+type internal FsiScanner(_buffer:IVsTextLines) =
     interface Microsoft.VisualStudio.Package.IScanner with
-        override this.SetSource(source:string,offset:int) = ()
-        override this.ScanTokenAndProvideInfoAboutIt(tokenInfo:TokenInfo,state:byref<int>) = false
+        override this.SetSource(_:string,_:int) = ()
+        override this.ScanTokenAndProvideInfoAboutIt(_:TokenInfo,_:byref<int>) = false
             // Implementing a scanner with TokenTriggers could start intellisense calls, e.g. on DOT.
 
-type internal FsiAuthoringScope(sessions:FsiSessions option,readOnlySpanGetter:unit -> TextSpan) = 
+type internal FsiAuthoringScope(sessions:FsiSessions option,_readOnlySpanGetter:unit -> TextSpan) = 
     inherit AuthoringScope()
-    override this.GetDataTipText(line:int,col:int,span:byref<TextSpan>) =
+    override this.GetDataTipText(_:int,_:int,span:byref<TextSpan>) =
         span <- new TextSpan()
         null
 
-    override this.GetDeclarations(_snapshot,line:int,col:int,info:TokenInfo,reason:ParseReason) =
+    override this.GetDeclarations(_snapshot,_:int,_:int,_:TokenInfo,_:ParseReason) =
         match sessions with
         | None -> (new FsiDeclarations() :> Declarations)
-        | Some sessions ->
+        | Some _ ->
 #if FSI_SERVER_INTELLISENSE
           if Guids.enable_fsi_intellisense then
             let lines = view.GetBuffer()                   |> throwOnFailure1
@@ -140,13 +140,13 @@ type internal FsiAuthoringScope(sessions:FsiSessions option,readOnlySpanGetter:u
 #endif
             (new FsiDeclarations() :> Declarations)
 
-    override this.GetMethods(line:int,col:int,name:string) = 
+    override this.GetMethods(_:int,_:int,_:string) = 
         new FsiMethods() :> Methods
 
-    override this.Goto(cmd      : VSConstants.VSStd97CmdID,
-                       textView : IVsTextView,
-                       line     : int,
-                       col      : int,
+    override this.Goto(_      : VSConstants.VSStd97CmdID,
+                       _ : IVsTextView,
+                       _     : int,
+                       _      : int,
                        span     : byref<TextSpan>) =
         span <- new TextSpan()
         null : string
@@ -164,14 +164,14 @@ type internal FsiViewFilter(mgr:CodeWindowManager,view:IVsTextView) =
     override this.HandlePreExec(guidCmdGroup:byref<Guid>,nCmdId:uint32,nCmdexecopt:uint32,pvaIn:IntPtr,pvaOut:IntPtr) =
         if isShowMemberList guidCmdGroup nCmdId then
             // does it come through?
-            let line, col = view.GetCaretPos() |> throwOnFailure2
-            let source = mgr.Source
+            let _line, _col = view.GetCaretPos() |> throwOnFailure2
+            let _source = mgr.Source
             let tokenInfo = new TokenInfo()
             mgr.Source.Completion(view,tokenInfo,ParseReason.DisplayMemberList)
             true // handled here
         elif isCompleteWord guidCmdGroup nCmdId then
-            let line, col = view.GetCaretPos() |> throwOnFailure2
-            let source = mgr.Source
+            let _line, _col = view.GetCaretPos() |> throwOnFailure2
+            let _source = mgr.Source
             let tokenInfo = new TokenInfo() // Rather than MPFs source.GetTokenInfo(line,col)
             mgr.Source.Completion(view,
                                   tokenInfo,
@@ -223,7 +223,7 @@ type internal FsiLanguageService() =
             scanner <- (new FsiScanner(buffer) :> IScanner)
         scanner
         
-    override this.ParseSource(req:ParseRequest) =
+    override this.ParseSource(_:ParseRequest) =
         (new FsiAuthoringScope(sessions,readOnlySpan) :> AuthoringScope)
                 
     override this.Name = "FSharpInteractive" // LINK: see ProvidePackage attribute on the package.
@@ -237,6 +237,6 @@ type internal FsiLanguageService() =
         count <- 1
         VSConstants.S_OK
         
-    override this.GetColorableItem(index, colorableItem) =
+    override this.GetColorableItem(_, colorableItem) =
         colorableItem <- Helpers.FsiKeyword
         VSConstants.S_OK

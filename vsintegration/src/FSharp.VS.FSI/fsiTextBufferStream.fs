@@ -25,7 +25,7 @@ open Microsoft.VisualStudio.Utilities
 // It provides the API for writing directly to the read-only part of the buffer.
 // It extends the read-only marker on the buffer (making the written text read-only).
 //
-type internal TextBufferStream(textLines:ITextBuffer, contentTypeRegistry: IContentTypeRegistryService) = 
+type internal TextBufferStream(textLines:ITextBuffer, _contentTypeRegistry: IContentTypeRegistryService) = 
     do if null = textLines then raise (new ArgumentNullException("textLines"))
     // The following line causes unhandled excepiton on a background thread, see https://github.com/Microsoft/visualfsharp/issues/2318#issuecomment-279340343
     // It seems we should provide a Quick Info Provider at the same time as uncommenting it.

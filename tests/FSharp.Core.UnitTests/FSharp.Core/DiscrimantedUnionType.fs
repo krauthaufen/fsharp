@@ -46,8 +46,7 @@ type UseUnionsAsFlags() =
         Assert.AreEqual(int unknown, 99)
     
     [<Fact>]
-    member this.CanParseViaBCL() = 
-        let values = System.Enum.GetValues(typeof<FlagsUnion>)
+    member this.CanParseViaBCL() =
         let fourFromString = System.Enum.Parse(typeof<FlagsUnion>, "Four", false) :?> FlagsUnion // downcast needed
         Assert.AreEqual(fourFromString, FlagsUnion.Four)
     
@@ -157,8 +156,8 @@ let [<Fact>] ``struct unions support function argument bindings`` () =
 [<CustomComparison; CustomEquality>]
 type ComparisonStructUnion =
     | SU2 of int * int 
-    member x.C1 = (match x with SU2(a,b) -> a)
-    member x.C2 = (match x with SU2(a,b) -> b)
+    member x.C1 = (match x with SU2(a,_) -> a)
+    member x.C2 = (match x with SU2(_,b) -> b)
     override self.Equals other =
         match other with
         | :? ComparisonStructUnion as o ->  (self.C1 + self.C2) = (o.C1 + o.C2)

@@ -82,8 +82,9 @@ let changeProperty() =
         """
         |> typecheck
         |> shouldFail
-        |> withSingleDiagnostic (Warning 20, Line 9, Col 5, Line 9, Col 23,
-                                 "The result of this equality expression has type 'bool' and is implicitly discarded. Consider using 'let' to bind the result to a name, e.g. 'let result = expression'.")
+        |> withDiagnostics [
+            (Warning 20, Line 9, Col 5, Line 9, Col 23, "The result of this equality expression has type 'bool' and is implicitly discarded. Consider using 'let' to bind the result to a name, e.g. 'let result = expression'.")
+            (Warning 1182,  Line 2, Col 14, Line 2, Col 23, "The value 'property1' is unused")]
 
     [<Fact>]
     let ``Warn If Implicitly Discarded``() =

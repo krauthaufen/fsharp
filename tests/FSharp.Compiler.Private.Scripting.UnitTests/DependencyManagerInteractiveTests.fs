@@ -34,11 +34,6 @@ type DependencyManagerInteractiveTests() =
         | Ok(value) -> value
         | Error ex -> raise ex
 
-    let getErrors ((_value: Result<FsiValue option, exn>), (errors: FSharpErrorInfo[])) =
-        errors
-
-    let ignoreValue = getValue >> ignore
-
     [<Fact>]
     member __.``SmokeTest - #r nuget``() =
         let text = """
@@ -56,7 +51,7 @@ type DependencyManagerInteractiveTests() =
 #r @"nuget:System.Collections.Immutable.DoesNotExist, version=1.5.0"
 0"""
         use script = new scriptHost()
-        let opt, errors = script.Eval(text)
+        let _, errors = script.Eval(text)
         Assert.Equal(errors.Length, 1)
 
 (*
@@ -151,8 +146,6 @@ type DependencyManagerInteractiveTests() =
 
     [<Fact>]
     member __.``Multiple Instances of DependencyProvider should be isolated``() =
-
-        let assemblyProbingPaths () = Seq.empty<string>
         let nativeProbingRoots () = Seq.empty<string>
 
         use dp1 = new DependencyProvider(NativeResolutionProbe(nativeProbingRoots))
@@ -278,7 +271,6 @@ TorchSharp.Tensor.LongTensor.From([| 0L .. 100L |]).Device
             ResolvingErrorReport (report)
 
         let mutable resolverPackageRoots = Seq.empty<string>
-        let mutable resolverPackageRoots = Seq.empty<string>
         let mutable resolverReferences = Seq.empty<string>
 
         let nativeProbingRoots () = resolverPackageRoots
@@ -374,11 +366,9 @@ printfn ""%A"" result
             ResolvingErrorReport (report)
 
         let mutable resolverPackageRoots = Seq.empty<string>
-        let mutable resolverPackageRoots = Seq.empty<string>
 
         let mutable resolverReferences = Seq.empty<string>
         let nativeProbingRoots () = resolverPackageRoots
-        let assemblyPaths () = resolverReferences
 
         // Restore packages, Get Reference dll paths and package roots
         let result =
@@ -513,10 +503,8 @@ x |> Seq.iter(fun r ->
             ResolvingErrorReport (report)
 
         let mutable resolverPackageRoots = Seq.empty<string>
-        let mutable resolverReferences = Seq.empty<string>
 
         let nativeProbingRoots () = resolverPackageRoots
-        let assemblyProbingPaths () = resolverReferences
 
         // Restore packages, Get Reference dll paths and package roots
         let result =
@@ -539,10 +527,8 @@ x |> Seq.iter(fun r ->
             ResolvingErrorReport (report)
 
         let mutable resolverPackageRoots = Seq.empty<string>
-        let mutable resolverReferences = Seq.empty<string>
 
         let nativeProbingRoots () = resolverPackageRoots
-        let assemblyProbingPaths () = resolverReferences
 
         // Restore packages, Get Reference dll paths and package roots
         let result =
@@ -645,7 +631,7 @@ x |> Seq.iter(fun r ->
 
         // Set up AssemblyResolver to resolve dll's
         do
-            use dp = new AssemblyResolveHandler(AssemblyResolutionProbe(assemblyProbingPaths))
+            use __ = new AssemblyResolveHandler(AssemblyResolutionProbe(assemblyProbingPaths))
 
             // Invoking a non-existent assembly causes a probe. which should invoke the call back
             try Assembly.Load("NoneSuchAssembly") |> ignore with _ -> ()
@@ -741,16 +727,15 @@ x |> Seq.iter(fun r ->
             lines.Add(line)
             match expected |> Array.tryFind(compareLine) with
             | None -> ()
-            | Some t ->
+            | Some _ ->
                 found <- found + 1
                 if found = expected.Length then sawExpectedOutput.Set() |> ignore
 
         let text = "#help"
         use output = new RedirectConsoleOutput()
         use script = new FSharpScript(quiet = false, langVersion = LangVersion.V47)
-        let mutable found = 0
         output.OutputProduced.Add (fun line -> verifyOutput line)
-        let opt = script.Eval(text) |> getValue
+        let _ = script.Eval(text) |> getValue
         Assert.True(sawExpectedOutput.WaitOne(TimeSpan.FromSeconds(5.0)), sprintf "Expected to see error sentinel value written\nexpected:%A\nactual:%A" expected lines)
 
 
@@ -790,14 +775,13 @@ x |> Seq.iter(fun r ->
             lines.Add(line)
             match expected |> Array.tryFind(compareLine) with
             | None -> ()
-            | Some t ->
+            | Some _ ->
                 found <- found + 1
                 if found = expected.Length then sawExpectedOutput.Set() |> ignore
 
         let text = "#help"
         use output = new RedirectConsoleOutput()
         use script = new FSharpScript(quiet = false, langVersion = LangVersion.Preview)
-        let mutable found = 0
         output.OutputProduced.Add (fun line -> verifyOutput line)
-        let opt = script.Eval(text) |> getValue
+        let _ = script.Eval(text) |> getValue
         Assert.True(sawExpectedOutput.WaitOne(TimeSpan.FromSeconds(5.0)), sprintf "Expected to see error sentinel value written\nexpected:%A\nactual:%A" expected lines)

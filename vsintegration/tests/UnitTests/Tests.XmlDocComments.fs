@@ -56,11 +56,11 @@ type XmlDocComments() =
         let solution = this.CreateSolution()
         let project1 = CreateProject(solution, "FSLibrary")
         let project2 = CreateProject(solution, "FSClient")
-        let file1 = AddFileFromTextBlob(project1,"File1.fs", fileContent1)
+        let _ = AddFileFromTextBlob(project1,"File1.fs", fileContent1)
         AddProjectReference(project2,project1)       
         Build(project1) |> fun result -> Assert.IsTrue(result.BuildSucceeded)
 
-        let file2 = AddFileFromTextBlob(project2,"File2.fs", fileContent2)
+        let _ = AddFileFromTextBlob(project2,"File2.fs", fileContent2)
         let file = OpenFile(project2, "File2.fs")
         MoveCursorToStartOfMarker(file, marker)
         GetQuickInfoAtCursor file

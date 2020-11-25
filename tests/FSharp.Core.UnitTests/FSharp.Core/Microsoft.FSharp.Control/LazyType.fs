@@ -80,20 +80,20 @@ type LazyType() =
         // int 
         let intLazy  = Lazy<_>.Create( fun () -> 1)
         Assert.AreEqual(not intLazy.IsValueCreated,true)
-        let resultIsDelayed = intLazy.Force()
+        let _ = intLazy.Force()
         Assert.AreEqual(not intLazy.IsValueCreated,false)
         
         // string
         let stringLazy = Lazy<_>.Create( fun () -> "string")
         Assert.AreEqual(not stringLazy.IsValueCreated,true)
-        let resultIsDelayed = stringLazy.Force()
+        let _ = stringLazy.Force()
         Assert.AreEqual(not stringLazy.IsValueCreated,false)
         
         
         //null
         let nullLazy = Lazy<_>.Create(fun () -> null)
         Assert.AreEqual(not nullLazy.IsValueCreated,true)
-        let resultIsDelayed = nullLazy.Force()
+        let _ = nullLazy.Force()
         Assert.AreEqual(not nullLazy.IsValueCreated,false)
         
     [<Fact>]
@@ -102,20 +102,20 @@ type LazyType() =
         // int 
         let intLazy  = Lazy<_>.Create( fun () -> 1)
         Assert.AreEqual( intLazy.IsValueCreated,false)
-        let resultIsForced = intLazy.Force()
+        let _ = intLazy.Force()
         Assert.AreEqual( intLazy.IsValueCreated,true)
         
         // string
         let stringLazy = Lazy<_>.Create( fun () -> "string")
         Assert.AreEqual( stringLazy.IsValueCreated,false)
-        let resultIsForced = stringLazy.Force()
+        let _ = stringLazy.Force()
         Assert.AreEqual( stringLazy.IsValueCreated,true)
         
         
         //null
         let nullLazy = Lazy<_>.Create(fun () -> null)
         Assert.AreEqual( nullLazy.IsValueCreated,false)
-        let resultIsForced = nullLazy.Force()
+        let _ = nullLazy.Force()
         Assert.AreEqual( nullLazy.IsValueCreated,true)
         
     [<Fact>]

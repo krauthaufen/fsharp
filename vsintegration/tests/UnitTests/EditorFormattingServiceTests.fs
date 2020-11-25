@@ -52,18 +52,6 @@ let def =
         "hi"
         )marker4
 """
-
-    let pasteTemplate = """
-
-let foo =
-    printfn "Something here"
-    marker1
-
-marker2
-
-            marker3
-
-marker4"""
     
     [<TestCase("marker1", "]")>]
     [<TestCase("marker2", "}")>]

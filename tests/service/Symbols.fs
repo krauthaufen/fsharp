@@ -35,7 +35,7 @@ match "foo" with
 """
 
     let getCaseUsages source line =
-         let fileName, options = mkTestFileAndOptions source [| |]
+         let fileName, options = mkTestFileAndOptions [| |]
          let _, checkResults = parseAndCheckFile fileName source options
           
          checkResults.GetAllUsesOfAllSymbolsInFile()
@@ -100,7 +100,7 @@ module Mod1 =
     module Mod2 =
        let func2 () = ()
 """
-        let fileName, options = mkTestFileAndOptions source [| |]
+        let fileName, options = mkTestFileAndOptions [| |]
         let _, checkResults = parseAndCheckFile fileName source options  
 
         let mod1 = checkResults.PartialAssemblySignature.FindEntityByPath ["Ns1"; "Mod1"] |> Option.get
@@ -120,7 +120,7 @@ let val1 = 1
 module Mod2 =
     let func2 () = ()
 """
-         let fileName, options = mkTestFileAndOptions source [| |]
+         let fileName, options = mkTestFileAndOptions [| |]
          let _, checkResults = parseAndCheckFile fileName source options  
 
          let mod1 = checkResults.PartialAssemblySignature.FindEntityByPath ["Mod1"] |> Option.get
@@ -147,7 +147,7 @@ type FooAttribute() =
 [<Foo>]
 let x = 123
 """
-        let fileName, options = mkTestFileAndOptions source [| "--noconditionalerasure" |]
+        let fileName, options = mkTestFileAndOptions [| "--noconditionalerasure" |]
         let _, checkResults = parseAndCheckFile fileName source options
 
         checkResults.GetAllUsesOfAllSymbolsInFile()

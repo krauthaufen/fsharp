@@ -36,14 +36,7 @@ type References() =
     /////////////////////////////////
     // project helpers
     static let SaveProject(project : UnitTestingFSharpProjectNode) =
-        project.Save(null, 1, 0u) |> ignore
-
-    static let DefaultBuildActionOfFilename(filename) : Salsa.BuildAction = 
-        match Path.GetExtension(filename) with 
-        | ".fsx" -> Salsa.BuildAction.None
-        | ".resx"
-        | ".resources" -> Salsa.BuildAction.EmbeddedResource
-        | _ -> Salsa.BuildAction.Compile            
+        project.Save(null, 1, 0u) |> ignore           
 
     static let GetReferenceContainerNode(project : ProjectNode) =
         let l = new List<ReferenceContainerNode>()
@@ -91,7 +84,7 @@ type References() =
         this.CreateDummyTestProjectBuildItAndDo(fun exe ->
             Assert.IsTrue(File.Exists exe, "failed to build exe")
             this.MakeProjectAndDoWithProjectFile(["doesNotMatter.fs"], ["mscorlib"; "System"; "System.Core"; "System.Net"], 
-                                                    "<ItemGroup><Reference Include=\"Test\"><HintPath>.\\Test.dll</HintPath></Reference></ItemGroup>", "v4.0", (fun project file ->
+                                                    "<ItemGroup><Reference Include=\"Test\"><HintPath>.\\Test.dll</HintPath></Reference></ItemGroup>", "v4.0", (fun project _ ->
                 let assemRef = TheTests.FindNodeWithCaption(project, "Test") :?> AssemblyReferenceNode
                 Assert.IsFalse(assemRef.CanShowDefaultIcon(), "reference should be banged out, does not resolve")
                 // add reference to Test.exe
@@ -108,7 +101,7 @@ type References() =
         this.CreateDummyTestProjectBuildItAndDo(fun exe ->
             Assert.IsTrue(File.Exists exe, "failed to build exe")
             this.MakeProjectAndDoWithProjectFile(["doesNotMatter.fs"], ["mscorlib"; "System"; "System.Core"; "System.Net"], 
-                                                    sprintf "<ItemGroup><Reference Include=\"Test\"><HintPath>%s</HintPath></Reference></ItemGroup>" exe, "v4.0", (fun project file ->
+                                                    sprintf "<ItemGroup><Reference Include=\"Test\"><HintPath>%s</HintPath></Reference></ItemGroup>" exe, "v4.0", (fun project _ ->
                 let assemRef = TheTests.FindNodeWithCaption(project, "Test") :?> AssemblyReferenceNode
                 Assert.IsTrue(assemRef.CanShowDefaultIcon(), "reference should not be banged out, does resolve")
                 // add reference to Test.exe

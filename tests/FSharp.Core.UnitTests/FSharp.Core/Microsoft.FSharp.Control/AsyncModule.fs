@@ -155,7 +155,7 @@ type AsyncModule() =
             do! Async.SwitchToThreadPool()
             let tickstamps = ref [] // like timestamps but for ticks :)
             
-            for i = 1 to 10 do
+            for _ = 1 to 10 do
                 tickstamps := DateTime.UtcNow.Ticks :: !tickstamps
                 do! Async.Sleep(20)
                 
@@ -192,7 +192,7 @@ type AsyncModule() =
     [<Fact>]
     member this.AwaitIAsyncResult() =
 
-        let beginOp, endOp, cancelOp = Async.AsBeginEnd(fun() -> getTicksTask)
+        let beginOp, _, _ = Async.AsBeginEnd(fun() -> getTicksTask)
 
         // Begin the async operation and wait
         let operationIAR = beginOp ((), new AsyncCallback(fun iar -> ()), null)
@@ -280,7 +280,7 @@ type AsyncModule() =
             use cancelHandlerRegistered = new ManualResetEvent(false)
             let cts = new System.Threading.CancellationTokenSource()
             let go = async {
-                use! holder = Async.OnCancel(fun() -> lock flag (fun() -> flag.Set()) |> ignore)
+                use! __ = Async.OnCancel(fun() -> lock flag (fun() -> flag.Set()) |> ignore)
                 let _ = cancelHandlerRegistered.Set()
                 while true do
                     do! Async.Sleep 50
@@ -301,7 +301,7 @@ type AsyncModule() =
         let flag = ref 0
         let cts = new System.Threading.CancellationTokenSource()
         let go = async {
-            use disp =
+            use __ =
                 cts.Cancel()
                 { new IDisposable with
                     override __.Dispose() = incr flag }
@@ -443,13 +443,13 @@ type AsyncModule() =
 
     [<Fact>]
     member this.``dispose should not throw when called on null``() =
-        let result = async { use x = null in return () } |> Async.RunSynchronously
+        let result = async { use _ = null in return () } |> Async.RunSynchronously
 
         Assert.AreEqual((), result)
 
     [<Fact>]
     member this.``dispose should not throw when called on null struct``() =
-        let result = async { use x = new Dummy(1) in return () } |> Async.RunSynchronously
+        let result = async { use _ = new Dummy(1) in return () } |> Async.RunSynchronously
 
         Assert.AreEqual((), result)
 
@@ -477,7 +477,7 @@ type AsyncModule() =
         let wh = new System.Threading.ManualResetEvent(false)
         let test = async {
             try
-                let! timeout = Async.AwaitWaitHandle(wh, 1000)
+                let! _ = Async.AwaitWaitHandle(wh, 1000)
                 do! Async.Sleep 500
                 raise (new InvalidOperationException("EXPECTED"))
                 return Assert.Fail("Should not get here")
@@ -548,13 +548,13 @@ type AsyncModule() =
         // case 2
         r := ""
         try
-            Async.StartWithContinuations(Async.FromContinuations(fun (s, _, _) -> s()), (fun () -> failwith "boom"), (fun e -> r := e.Message), (fun oce -> ()))
+            Async.StartWithContinuations(Async.FromContinuations(fun (s, _, _) -> s()), (fun () -> failwith "boom"), (fun e -> r := e.Message), (fun _ -> ()))
         with
             e -> r := "EX: " + e.Message
         Assert.AreEqual("EX: boom", !r)
         // case 3
         r := ""
-        Async.StartWithContinuations(async { return! failwith "boom" }, (fun x -> ()), (fun e -> r := e.Message), (fun oce -> ()))
+        Async.StartWithContinuations(async { return! failwith "boom" }, (fun _ -> ()), (fun e -> r := e.Message), (fun _ -> ()))
         Assert.AreEqual("boom", !r)
 
 
@@ -664,13 +664,13 @@ type AsyncModule() =
 
     [<Fact>]
     member this.``RaceBetweenCancellationAndError.Parallel(maxDegreeOfParallelism)``() =
-        [| for i in 1 .. 1000 -> async { failwith "boom" } |]
+        [| for _ in 1 .. 1000 -> async { failwith "boom" } |]
         |> fun cs -> Async.Parallel(cs, 1)
         |> testErrorAndCancelRace "RaceBetweenCancellationAndError.Parallel(maxDegreeOfParallelism)"
 
     [<Fact>]
     member this.``RaceBetweenCancellationAndError.Parallel``() =
-        [| for i in 1 .. 1000 -> async { failwith "boom" } |]
+        [| for _ in 1 .. 1000 -> async { failwith "boom" } |]
         |> fun cs -> Async.Parallel(cs)
         |> testErrorAndCancelRace "RaceBetweenCancellationAndError.Parallel"
 

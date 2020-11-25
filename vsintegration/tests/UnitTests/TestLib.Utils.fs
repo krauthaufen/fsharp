@@ -112,7 +112,7 @@ module Spawn =
                   UserProcessorTime=proc.UserProcessorTime.TotalMilliseconds
                   TotalProcessorTime=proc.TotalProcessorTime.TotalMilliseconds
                 }    
-            with :? InvalidOperationException as e ->
+            with :? InvalidOperationException ->
                 // There is what appears to be an unresolvable race here. The process may exit while building the record.
                 { PeakPagedMemorySize=0L
                   PeakVirtualMemorySize=0L
@@ -130,7 +130,7 @@ module Spawn =
                   UserProcessorTime=max proc.UserProcessorTime.TotalMilliseconds original.UserProcessorTime
                   TotalProcessorTime=max proc.TotalProcessorTime.TotalMilliseconds original.TotalProcessorTime
                 }    
-            with :? InvalidOperationException as e ->
+            with :? InvalidOperationException ->
                 // There is what appears to be an unresolvable race here. The process may exit while building the record.
                 original
 
@@ -196,7 +196,7 @@ module Spawn =
         let capture (msg:DataReceivedEventArgs) = 
             lock outlock (fun () -> captured := msg.Data :: !captured)
 
-        let exitWithResult command arguments actualCode _ = 
+        let exitWithResult _ _ actualCode _ = 
             actualCode, (!captured)|>List.rev|>Array.ofList
 
         spawnDetailed capture capture exitWithResult command fmt
@@ -211,7 +211,7 @@ module Spawn =
         let capture (msg:DataReceivedEventArgs) = 
             lock outlock (fun () -> captured := msg.Data :: !captured)
 
-        let exitWithResult command arguments actualCode _ = 
+        let exitWithResult _ _ actualCode _ = 
             actualCode, (!captured)|>List.rev|>Array.ofList
 
         FilesystemHelpers.DoWithTempFile
@@ -299,7 +299,7 @@ namespace TestLibrary
         | Variable x     -> lookup g x
         | Lambda _       -> e
         | Apply (e1, e2) -> match eval g e1 with
-                            | Lambda (x, e) -> eval (add g x (eval g e2)) e1
+                            | Lambda (x, _) -> eval (add g x (eval g e2)) e1
                             | _             -> raise <| EvalFailure "Unexpected operator in application; need a lambda."
 
   module OtherTests =
@@ -350,9 +350,9 @@ namespace TestLibrary
       member this.fold (f : 'a -> Point -> 'a)(acc : 'a) =
         match this.getVertices () with
         | []      -> acc
-        | p :: ps -> f (this.refold f acc) p
+        | p :: _ -> f (this.refold f acc) p
 
-      member this.refold (f : 'a -> Point -> 'a)(acc : 'a) =
+      member this.refold (_ : 'a -> Point -> 'a)(acc : 'a) =
         let ps = this.getVertices ()
         let set ps =
           this.clearVertices ()
@@ -360,7 +360,6 @@ namespace TestLibrary
         match ps with
         | []      -> ()
         | _ :: ps -> set ps
-        let res = this.fold f acc
         set ps
         acc
 

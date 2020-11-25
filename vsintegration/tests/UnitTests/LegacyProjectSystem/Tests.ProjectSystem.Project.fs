@@ -34,18 +34,6 @@ type Project() =
     static let SaveProject(project : UnitTestingFSharpProjectNode) =
         project.Save(null, 1, 0u) |> ignore
 
-    static let DefaultBuildActionOfFilename(filename) : Salsa.BuildAction = 
-        match Path.GetExtension(filename) with 
-        | ".fsx" -> Salsa.BuildAction.None
-        | ".resx"
-        | ".resources" -> Salsa.BuildAction.EmbeddedResource
-        | _ -> Salsa.BuildAction.Compile            
-
-    static let GetReferenceContainerNode(project : ProjectNode) =
-        let l = new List<ReferenceContainerNode>()
-        project.FindNodesOfType(l)
-        l.[0]     
-
     [<Test>]    
     member public this.NewFolderOnProjectMenu() =
         printfn "starting..."
@@ -256,10 +244,10 @@ type Project() =
     [<Test>]
     member public this.``FsprojFileToSolutionExplorer.FileMovement.MoveUpShouldDirtyProject``() =
         let items = MSBuildItems([CompileItem "foo.fs"; CompileItem "bar.fs"])
-        this.MakeProjectAndDoWithProjectFile([], [], items.ToString(), (fun project fileName ->
+        this.MakeProjectAndDoWithProjectFile([], [], items.ToString(), (fun project _ ->
             // Save the project first, then move the file, and check for dirty.
             SaveProject(project)
-            let foo = TheTests.FindNodeWithCaption(project, "foo.fs")
+            let _ = TheTests.FindNodeWithCaption(project, "foo.fs")
             let bar = TheTests.FindNodeWithCaption(project, "bar.fs")
             TheTests.MoveUp(bar)
             AssertEqual true project.IsProjectFileDirty
@@ -273,11 +261,11 @@ type Project() =
     [<Test>]
     member public this.``FsprojFileToSolutionExplorer.FileMovement.MoveDownShouldDirtyProject``() =
         let items = MSBuildItems([CompileItem "foo.fs"; CompileItem "bar.fs"])
-        this.MakeProjectAndDoWithProjectFile([], [], items.ToString(), (fun project fileName ->
+        this.MakeProjectAndDoWithProjectFile([], [], items.ToString(), (fun project _ ->
             // Save the project first, then move the file, and check for dirty.
             SaveProject(project)
             let foo = TheTests.FindNodeWithCaption(project, "foo.fs")
-            let bar = TheTests.FindNodeWithCaption(project, "bar.fs")
+            let _ = TheTests.FindNodeWithCaption(project, "bar.fs")
             TheTests.MoveDown(foo)
             AssertEqual true project.IsProjectFileDirty
             // Tests the tree

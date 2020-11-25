@@ -19,7 +19,7 @@ type UsingMSBuild()  =
 
     //Verify the error list containd the expected string
     member private this.VerifyErrorListContainedExpectedString(fileContents : string, expectedStr : string) =
-        let (solution, project, file) = this.CreateSingleFileProject(fileContents)       
+        let (_, project, _) = this.CreateSingleFileProject(fileContents)       
         let errorList = GetErrors(project)
         let GetErrorMessages(errorList : Error list) =
             [ for i = 0 to errorList.Length - 1 do

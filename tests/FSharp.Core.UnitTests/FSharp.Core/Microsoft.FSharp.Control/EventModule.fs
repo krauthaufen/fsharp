@@ -96,7 +96,7 @@ type EventModule() =
 
         let timesListened = ref 0
         kqfc.BroadcastSignal
-        |> Event.add(fun rbEventArgs -> incr timesListened)
+        |> Event.add(fun _ -> incr timesListened)
 
         kqfc.BeginBroadcasting(
             [

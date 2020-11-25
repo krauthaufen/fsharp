@@ -88,7 +88,6 @@ let ShouldHighlightAllQualifiedSymbolReferences() =
     """
     let sourceText = SourceText.From(fileContents)
     let caretPosition = fileContents.IndexOf("DateTime") + 1
-    let documentId = DocumentId.CreateNewId(ProjectId.CreateNewId())
     
     let spans = getSpans sourceText caretPosition
     
@@ -99,7 +98,6 @@ let ShouldHighlightAllQualifiedSymbolReferences() =
     Assert.AreEqual(expected, spans)
 
     let caretPosition = fileContents.IndexOf("Now") + 1
-    let documentId = DocumentId.CreateNewId(ProjectId.CreateNewId())
     let spans = getSpans sourceText caretPosition
     let expected = [| span sourceText false (2, 28) (2, 31) |]
     

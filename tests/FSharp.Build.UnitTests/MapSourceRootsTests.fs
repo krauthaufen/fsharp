@@ -14,7 +14,7 @@ type MockEngine() =
     member val Messages = ResizeArray() with get
 
     interface IBuildEngine with
-        member this.BuildProjectFile(projectFileName: string, targetNames: string [], globalProperties: System.Collections.IDictionary, targetOutputs: System.Collections.IDictionary): bool =
+        member this.BuildProjectFile(_: string, _: string [], _: System.Collections.IDictionary, _: System.Collections.IDictionary): bool =
             failwith "Not Implemented"
         member this.ColumnNumberOfTaskNode: int = 0
         member this.ContinueOnError: bool = true
@@ -141,7 +141,7 @@ type MapSourceRootsTests() =
                 Assert.IsTrue(errorMessages |> Seq.exists (fun err -> err.EndsWith expectedErrorPath),
                               sprintf "expected an error to end with '%s', none did.\nMessages were:\n%A" expectedErrorPath errorMessages)
             )
-        | Some mappings ->
+        | Some _ ->
             Assert.Fail("Expected to fail on the inputs")
 
     [<Test>]
@@ -219,7 +219,7 @@ type MapSourceRootsTests() =
             |> Seq.iter (fun expectedErrorPath ->
                 Assert.IsTrue(errorMessages |> Seq.exists (fun err -> err.EndsWith expectedErrorPath), sprintf "expected an error to end with '%s', none did.\nMessages were:\n%A" expectedErrorPath errorMessages)
             )
-        | Some mappings ->
+        | Some _ ->
             Assert.Fail("Expected to fail on the inputs")
 
     [<TestCase(true)>]
@@ -348,7 +348,7 @@ type MapSourceRootsTests() =
             |> Seq.iter (fun expectedErrorPath ->
                 Assert.IsTrue(errorMessages |> Seq.exists (fun err -> err.EndsWith expectedErrorPath), sprintf "expected an error to end with '%s', none did.\nMessages were:\n%A" expectedErrorPath errorMessages)
             )
-        | Some mappings ->
+        | Some _ ->
             Assert.Fail("Expected to fail on the inputs")
 
     [<Test>]
@@ -379,7 +379,7 @@ type MapSourceRootsTests() =
             |> Seq.iter (fun expectedErrorPath ->
                 Assert.IsTrue(errorMessages |> Seq.exists (fun err -> err.EndsWith expectedErrorPath), sprintf "expected an error to end with '%s', none did.\nMessages were:\n%A" expectedErrorPath errorMessages)
             )
-        | Some mappings ->
+        | Some _ ->
             Assert.Fail("Expected to fail on the inputs")
 
     [<TestCase(true)>]

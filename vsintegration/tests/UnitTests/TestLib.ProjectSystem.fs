@@ -49,32 +49,20 @@ type Tree<'T> =
     | Tree of (*data*)'T * (*firstChild*)Tree<'T> * (*nextSibling*)Tree<'T>
     | Nil
 
-type TheTests() = 
-    static let Net35RefAssemPathOnThisMachine() =
-        let key = @"SOFTWARE\Microsoft\.NETFramework\AssemblyFolders\Microsoft .NET Framework 3.5 Reference Assemblies"
-        let hklm = Registry.LocalMachine
-        let rkey = hklm.OpenSubKey(key)
-        rkey.GetValue("") :?> string
+type TheTests() =
 
     static let ANYTREE = Tree("",Nil,Nil)
    
             
     /////////////////////////////////
     // project helpers
-    static let SaveProject(project : UnitTestingFSharpProjectNode) =
-        project.Save(null, 1, 0u) |> ignore
 
     static let DefaultBuildActionOfFilename(filename) : Salsa.BuildAction = 
         match Path.GetExtension(filename) with 
         | ".fsx" -> Salsa.BuildAction.None
         | ".resx"
         | ".resources" -> Salsa.BuildAction.EmbeddedResource
-        | _ -> Salsa.BuildAction.Compile            
-
-    static let GetReferenceContainerNode(project : ProjectNode) =
-        let l = new List<ReferenceContainerNode>()
-        project.FindNodesOfType(l)
-        l.[0]            
+        | _ -> Salsa.BuildAction.Compile        
         
     /////////////////////////////////
     /// Called per test
@@ -119,7 +107,7 @@ type TheTests() =
                 Print(node.NextSibling, level)
         Print(node, 0)
 
-    static member internal CreateProject(filename : string, forceUTF8 : string, configChangeNotifier, serviceProvider) =
+    static member internal CreateProject(filename : string, forceUTF8 : string, _, serviceProvider) =
         UIStuff.SetupSynchronizationContext()
         let buildEngine = Utilities.InitializeMsBuildEngine(null)
         let buildProject = Utilities.InitializeMsBuildProject(buildEngine, filename, null)
@@ -369,7 +357,7 @@ type TheTests() =
         let ipsf = project :> IProvideProjectSite
         let ips = ipsf.GetProjectSite()
         let changed = ref false
-        let handle = ips.AdviseProjectSiteChanges("EnsureCausesNotificationTest", new AdviseProjectSiteChanges(fun () -> changed := true))
+        let _ = ips.AdviseProjectSiteChanges("EnsureCausesNotificationTest", new AdviseProjectSiteChanges(fun () -> changed := true))
         code()
         AssertEqual true (!changed)
     static member MsBuildCompileItems(project : Microsoft.Build.Evaluation.Project) =
@@ -507,7 +495,7 @@ type TheTests() =
 
     member internal this.HelperEnsureAtLeastOne projFileBoilerplate expectedConfigs expectedPlatforms =
         this.MakeProjectAndDoWithProjectFile(["foo.fs"], [], projFileBoilerplate,
-            (fun project projFileName ->
+            (fun project _ ->
                 this.CheckPlatformNames(project, expectedPlatforms)
                 this.CheckConfigNames(project, expectedConfigs)
             ))
@@ -537,8 +525,8 @@ and (*type*) MSBuildItem =
             let pathParts = s.Split([| '\\' |], StringSplitOptions.RemoveEmptyEntries)
             pathParts.[pathParts.Length - 1]
         | CompileItem(s) -> Path.GetFileName(s)
-        | LinkedCompileItem(inc,n) -> Path.GetFileName(n)
-        | OtherItem(name,inc) -> Path.GetFileName(inc)
+        | LinkedCompileItem(_,n) -> Path.GetFileName(n)
+        | OtherItem(_,inc) -> Path.GetFileName(inc)
     member this.IntoFolder(folder : string) =  // return new copy of item in the folder
         Debug.Assert(folder.EndsWith("\\"), "folders should end with slash")
         match this with
@@ -666,8 +654,8 @@ module LanguageServiceExtension =
                         member x.DestroyHook () =
                             if projInfo.Project = NULL then () else 
                             projInfo.Project.Close () |> ignore
-                            match projectDict |> Seq.tryFind(fun (KeyValue(k,v)) -> obj.ReferenceEquals(v, projInfo)) with
-                            | Some(KeyValue(k,v)) -> projectDict.Remove(k) |> ignore
+                            match projectDict |> Seq.tryFind(fun (KeyValue(_,v)) -> obj.ReferenceEquals(v, projInfo)) with
+                            | Some(KeyValue(k,_)) -> projectDict.Remove(k) |> ignore
                             | None -> failwith "uh-oh, where was it in the dict?"
                             projInfo.Project <- NULL
 

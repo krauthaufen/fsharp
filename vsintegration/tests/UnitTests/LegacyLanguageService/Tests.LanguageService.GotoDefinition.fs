@@ -21,7 +21,7 @@ type UsingMSBuild()  =
 
     //GoToDefinitionSuccess Helper Function
     member private this.VerifyGoToDefnSuccessAtStartOfMarker(fileContents : string, marker : string,  definitionCode : string,?addtlRefAssy : list<string>) =
-        let (sln, proj, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
 
         MoveCursorToStartOfMarker (file, marker)
         let identifier = (GetIdentifierAtCursor file).Value |> fst //use marker to get the identifier
@@ -54,7 +54,7 @@ type UsingMSBuild()  =
 
     //GoToDefinitionFail Helper Function
     member private this.VerifyGoToDefnFailAtStartOfMarker(fileContents : string,  marker :string, f : OpenFile * GotoDefnResult -> unit, ?addtlRefAssy : list<string>) =
-        let (sln, proj, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
 
         MoveCursorToStartOfMarker (file, marker)
         let result = GotoDefinitionAtCursor file
@@ -66,7 +66,7 @@ type UsingMSBuild()  =
     //  Fail at automation lab
     //  Succeed on dev machine with enlistment installed.
     member private this.VerifyGoToDefnNoErrorDialogAtStartOfMarker(fileContents : string,  marker :string, definitionCode : string, ?addtlRefAssy : list<string>) =
-        let (sln, proj, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
+        let (_, _, file) = this.CreateSingleFileProject(fileContents, ?references = addtlRefAssy)
 
         MoveCursorToStartOfMarker (file, marker)
         let identifier = (GetIdentifierAtCursor file).Value |> fst //use marker to get the identifier
@@ -177,7 +177,7 @@ type UsingMSBuild()  =
         // Note that the verification helped method is custom because we *do* care about the column as well, 
         // which is something that the general purpose method in this file (surprisingly!) does not do.
         let VerifyGoToDefnSuccessAtStartOfMarkerColumn(fileContents : string, marker : string,  definitionCode : string, typeProviderAssembly : string, columnMarker : string) =
-            let (sln, proj, file) = GlobalFunctions.CreateNamedSingleFileProject (this.VS, (fileContents, "File.fs"))  
+            let (_, proj, file) = GlobalFunctions.CreateNamedSingleFileProject (this.VS, (fileContents, "File.fs"))  
 
             // Add reference to the type provider
             this.AddAssemblyReference(proj,typeProviderAssembly)

@@ -25,11 +25,6 @@ type MapModule() =
     member this.Empty() =
         let emptyMap = Map.empty
         Assert.True(Map.isEmpty emptyMap)
-        
-        let a:Map<int,int>    = Map.empty<int,int>
-        let b : Map<string,string> = Map.empty<string,string>
-        let c : Map<int,string> = Map.empty<int,string>  
-
         ()
 
     [<Fact>]
@@ -100,13 +95,13 @@ type MapModule() =
     member this.Exists() =
         // value keys
         let valueKeyMap = Map.ofSeq [(2,"b"); (3,"c"); (4,"d"); (5,"e")]
-        let resultValueMap = Map.exists (fun x y -> x > 3) valueKeyMap        
+        let resultValueMap = Map.exists (fun x _ -> x > 3) valueKeyMap        
         Assert.True(resultValueMap)
 
         
         // reference keys
         let refMap = Map.ofSeq [for c in ["."; ".."; "..."; "...."] do yield (c, c.Length) ]
-        let resultRefMap = refMap |> Map.exists  (fun x y -> y>2 )
+        let resultRefMap = refMap |> Map.exists  (fun _ y -> y>2 )
         Assert.True(resultRefMap)
         
         // One-element Map
@@ -116,7 +111,7 @@ type MapModule() =
         
         // empty Map
         let eptMap = Map.empty
-        let resultEpt = Map.exists (fun x y -> false) eptMap
+        let resultEpt = Map.exists (fun _ _ -> false) eptMap
         Assert.False(resultEpt)
        
         ()
@@ -125,22 +120,22 @@ type MapModule() =
     member this.Filter() =
         // value keys
         let valueKeyMap = Map.ofSeq [(2,"b"); (3,"c"); (4,"d"); (5,"e")]
-        let resultValueMap =valueKeyMap |> Map.filter (fun x y -> x % 3 = 0)         
+        let resultValueMap =valueKeyMap |> Map.filter (fun x _ -> x % 3 = 0)         
         Assert.AreEqual(resultValueMap,[3,"c"] |> Map.ofList)
         
         // reference keys
         let refMap = Map.ofSeq [for c in ["."; ".."; "..."; "...."] do yield (c, c.Length) ]
-        let resultRefMap = refMap |> Map.filter  (fun x y -> y  > 3 ) 
+        let resultRefMap = refMap |> Map.filter  (fun _ y -> y  > 3 ) 
         Assert.AreEqual(resultRefMap,["....",4] |> Map.ofList)
         
         // One-element Map
         let oeleMap = Map.ofSeq [(1, "one")]
-        let resultOele = oeleMap |> Map.filter  (fun x y -> x<3 )         
+        let resultOele = oeleMap |> Map.filter  (fun x _ -> x<3 )         
         Assert.AreEqual(resultOele,oeleMap)
         
         // empty Map
         let eptMap = Map.empty
-        let resultEpt = Map.filter (fun x y -> true) eptMap        
+        let resultEpt = Map.filter (fun _ _ -> true) eptMap        
         Assert.AreEqual(resultEpt,eptMap)
                
         ()       
@@ -173,22 +168,22 @@ type MapModule() =
     member this.FindIndex() =
         // value keys
         let valueKeyMap = Map.ofSeq [(2,"b"); (3,"c"); (4,"d"); (5,"e")]
-        let resultValueMap =valueKeyMap |> Map.findKey (fun x y -> x % 3 = 0)         
+        let resultValueMap =valueKeyMap |> Map.findKey (fun x _ -> x % 3 = 0)         
         Assert.AreEqual(resultValueMap,3)
         
         // reference keys
         let refMap = Map.ofSeq [for c in ["."; ".."; "..."; "...."] do yield (c, c.Length) ]
-        let resultRefMap = refMap |> Map.findKey  (fun x y -> y % 3 = 0 )         
+        let resultRefMap = refMap |> Map.findKey  (fun _ y -> y % 3 = 0 )         
         Assert.AreEqual(resultRefMap,"...")
         
         // One-element Map
         let oeleMap = Map.ofSeq [(1, "one")]
-        let resultOele = oeleMap |> Map.findKey  (fun x y -> x = 1 )         
+        let resultOele = oeleMap |> Map.findKey  (fun x _ -> x = 1 )         
         Assert.AreEqual(resultOele,1)
         
         // empty Map
         let eptMap = Map.empty
-        CheckThrowsKeyNotFoundException (fun () -> Map.findKey (fun x y -> true) eptMap |> ignore)
+        CheckThrowsKeyNotFoundException (fun () -> Map.findKey (fun _ _ -> true) eptMap |> ignore)
                
         ()          
      
@@ -196,12 +191,12 @@ type MapModule() =
     member this.TryPick() =
         // value keys
         let valueKeyMap = Map.ofSeq [(2,"b"); (3,"c"); (4,"d"); (5,"e")]
-        let resultValueMap = valueKeyMap |> Map.tryPick (fun x y -> if x % 3 = 0 then Some (x) else None)         
+        let resultValueMap = valueKeyMap |> Map.tryPick (fun x _ -> if x % 3 = 0 then Some (x) else None)         
         Assert.AreEqual(resultValueMap,Some 3)
         
         // reference keys
         let refMap = Map.ofSeq [for c in ["."; ".."; "..."; "...."] do yield (c, c.Length) ]
-        let resultRefMap = refMap |> Map.tryPick  (fun x y -> if (y % 3 = 0 ) then Some y else None ) 
+        let resultRefMap = refMap |> Map.tryPick  (fun _ y -> if (y % 3 = 0 ) then Some y else None ) 
         
         Assert.AreEqual(resultRefMap,Some 3)
         
@@ -212,7 +207,7 @@ type MapModule() =
         
         // empty Map
         let eptMap = Map.empty
-        let resultEpt = Map.tryPick (fun x y -> Some x) eptMap        
+        let resultEpt = Map.tryPick (fun x _ -> Some x) eptMap        
         Assert.AreEqual(resultEpt,None)
                
         ()     
@@ -226,7 +221,7 @@ type MapModule() =
         
         // reference keys
         let refMap = Map.ofSeq [for c in ["."; ".."; "..."; "...."] do yield (c, c.Length) ]
-        let result = refMap |> Map.pick (fun x y -> if (y % 3 = 0 ) then Some y else None ) 
+        let result = refMap |> Map.pick (fun _ y -> if (y % 3 = 0 ) then Some y else None ) 
         Assert.AreEqual(result, 3)
         
         // One-element Map
@@ -238,7 +233,7 @@ type MapModule() =
         let eptMap = Map.empty
         let resultEpt = 
             try 
-                Map.pick (fun x y -> Some x) eptMap
+                Map.pick (fun x _ -> Some x) eptMap
             with :? System.Collections.Generic.KeyNotFoundException -> Some 0
         Assert.AreEqual(resultEpt, Some 0)
         
@@ -263,7 +258,7 @@ type MapModule() =
         
         // empty Map
         let eptMap = Map.empty
-        let resultEpt = eptMap |> Map.fold (fun x y z -> 1) 1         
+        let resultEpt = eptMap |> Map.fold (fun _ _ _ -> 1) 1         
         Assert.AreEqual(resultEpt,1)
                
         ()
@@ -287,7 +282,7 @@ type MapModule() =
         
         // empty Map
         let eptMap = Map.empty
-        let resultEpt = Map.foldBack (fun x y z -> 1) eptMap 1         
+        let resultEpt = Map.foldBack (fun _ _ _ -> 1) eptMap 1         
         Assert.AreEqual(resultEpt,1)
                
         ()
@@ -296,22 +291,22 @@ type MapModule() =
     member this.ForAll() =
         // value keys
         let valueKeyMap = Map.ofSeq [(2,"b"); (3,"c"); (4,"d"); (5,"e")]
-        let resultValueMap = valueKeyMap |> Map.forall (fun x y -> x % 3 = 0)         
+        let resultValueMap = valueKeyMap |> Map.forall (fun x _ -> x % 3 = 0)         
         Assert.False(resultValueMap)
         
         // reference keys
         let refMap = Map.ofSeq [for c in ["."; ".."; "..."; "...."] do yield (c, c.Length) ]
-        let resultRefMap = refMap |> Map.forall  (fun x y -> x.Length  > 4 )         
+        let resultRefMap = refMap |> Map.forall  (fun x _ -> x.Length  > 4 )         
         Assert.False(resultRefMap)
         
         // One-element Map
         let oeleMap = Map.ofSeq [(1, "one")]
-        let resultOele = oeleMap |> Map.forall  (fun x y -> x<3 )         
+        let resultOele = oeleMap |> Map.forall  (fun x _ -> x<3 )         
         Assert.True(resultOele)
         
         // empty Map
         let eptMap = Map.empty
-        let resultEpt =eptMap |>  Map.forall (fun x y -> true)         
+        let resultEpt =eptMap |>  Map.forall (fun _ _ -> true)         
         Assert.True(resultEpt)
                
         ()       
@@ -465,28 +460,28 @@ type MapModule() =
     member this.Partition() =
         // value keys
         let valueKeyMap = Map.ofSeq [(2,"b"); (3,"c"); (4,"d"); (5,"e")]
-        let resultValueMap = Map.partition (fun x y  -> x%2 = 0) valueKeyMap         
+        let resultValueMap = Map.partition (fun x _  -> x%2 = 0) valueKeyMap         
         let choosed = [(2,"b"); (4,"d")] |> Map.ofList
         let notChoosed = [(3,"c"); (5,"e")] |> Map.ofList
         Assert.AreEqual(resultValueMap,(choosed,notChoosed))
         
         // reference keys
         let refMap = Map.ofSeq [for c in ["."; ".."; "..."; "...."] do yield (c, c.Length) ]
-        let resultRefMap = refMap |>  Map.partition  (fun x y  -> x.Length >2 )        
+        let resultRefMap = refMap |>  Map.partition  (fun x _  -> x.Length >2 )        
         let choosed = [( "...",3); ("....",4)] |> Map.ofList
         let notChoosed = [(".",1); ("..",2)] |> Map.ofList
         Assert.AreEqual(resultRefMap,(choosed,notChoosed))
         
         // One-element Map
         let oeleMap = Map.ofSeq [(1, "one")]
-        let resultOele = Map.partition  (fun x y  -> x<4) oeleMap     
+        let resultOele = Map.partition  (fun x _  -> x<4) oeleMap     
         let choosed = [(1,"one")] |> Map.ofList
         let notChoosed = Map.empty<int,string>
         Assert.AreEqual(resultOele,(choosed,notChoosed))
         
         // empty Map
         let eptMap = Map.empty
-        let resultEpt = Map.partition (fun x y  -> true) eptMap          
+        let resultEpt = Map.partition (fun _ _ -> true) eptMap          
         Assert.AreEqual(resultEpt,(eptMap,eptMap))
                
         ()
@@ -577,21 +572,18 @@ type MapModule() =
         // value keys    
         let valueKeyMapOfArr = Map.ofSeq [(2,"b"); (3,"c"); (4,"d"); (5,"e")]  
         let resultValueMap = Map.toSeq valueKeyMapOfArr
-        let originInt = seq { for i in 1..3 do yield (i,i*i)}
         VerifySeqsEqual resultValueMap [(2,"b"); (3,"c"); (4,"d"); (5,"e")]
 
         
         // reference keys
         let refMapOfArr = Map.ofSeq [(".",1); ("..",2);( "...",3); ("....",4)]
         let resultRefMap = Map.toSeq refMapOfArr
-        let originStr = seq { for x in [  "is" ;"lists";"str"; "this"] do yield (x,x.ToUpper())}
         VerifySeqsEqual resultRefMap [(".",1); ("..",2);( "...",3); ("....",4)]
 
         
         // One-element Map
         let oeleMapOfArr = Map.ofSeq [(1,"one")]
         let resultOele = Map.toSeq oeleMapOfArr
-        let originMix = seq { for x in [ "is" ;"str"; "this" ;"lists"] do yield (x.Length,x.ToUpper())}
         VerifySeqsEqual resultOele [(1,"one")]
 
          
@@ -635,7 +627,7 @@ type MapModule() =
         
         // One-element Map
         let oeleMap = Map.ofSeq [(1, "one")]
-        let resultOele = oeleMap |> Map.tryFindKey (fun x y -> y.Contains("o"))        
+        let resultOele = oeleMap |> Map.tryFindKey (fun _ y -> y.Contains("o"))        
         Assert.AreEqual(resultOele,Some 1)
         
         // empty Map

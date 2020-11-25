@@ -129,14 +129,14 @@ module internal Salsa =
 
         let oneItem (project:Project) name = 
             match (items project name) with
-                  head::tail -> head
+                  head::_ -> head
                 | _ -> ""
 
         let splitProperty (project:Project) propertyName =
             (prop project propertyName).Split([|';'|])|>Array.toList
             
         let boolProperty (project:Project) name =
-            let p = prop project name
+            let _ = prop project name
             true
             
         /// Build the given target on the given project. Return the name of the main output assembly.   
@@ -168,7 +168,7 @@ module internal Salsa =
             let project,_,_ = GetProject(projectFileName, configuration, platform)
             SetGlobalProperty(project, "CreateManifestResourceNamesDependsOn", "SplitResourcesByCulture")
             let projectInstance = project.CreateProjectInstance()
-            let buildResult = projectInstance.Build(targetName, project.ProjectCollection.Loggers)
+            let _ = projectInstance.Build(targetName, project.ProjectCollection.Loggers)
             let items = projectInstance.GetItems("EmbeddedResource") |> Seq.map (fun i -> i.EvaluatedInclude, i.GetMetadata("ManifestResourceName").EvaluatedValue) |> Seq.toList
             items
         
@@ -251,7 +251,7 @@ module internal Salsa =
                 timestamp <- newtimestamp
                 prevConfig <- curConfig
                 prevPlatform <- curPlatform
-                let projectObj, projectObjFlags = MSBuild.CrackProject(projectfile, prevConfig, prevPlatform)
+                let _, projectObjFlags = MSBuild.CrackProject(projectfile, prevConfig, prevPlatform)
                 flags <- Some(projectObjFlags)
             match flags with
             | Some flags -> flags
@@ -279,14 +279,14 @@ module internal Salsa =
 
           member this.BuildErrorReporter with get() = None and set _v = ()
           member this.AdviseProjectSiteChanges(callbackOwnerKey,callback) = changeHandlers.[callbackOwnerKey] <- callback
-          member this.AdviseProjectSiteCleaned(callbackOwnerKey,callback) = () // no unit testing support here
-          member this.AdviseProjectSiteClosed(callbackOwnerKey,callback) = () // no unit testing support here
+          member this.AdviseProjectSiteCleaned(_,_) = () // no unit testing support here
+          member this.AdviseProjectSiteClosed(_,_) = () // no unit testing support here
           member this.IsIncompleteTypeCheckEnvironment = false
           member this.TargetFrameworkMoniker = ""
           member this.LoadTime = System.DateTime(2000,1,1)
 
           member this.ProjectGuid = 
-                let projectObj, projectObjFlags = MSBuild.CrackProject(projectfile, configurationFunc(), platformFunc())
+                let projectObj, _ = MSBuild.CrackProject(projectfile, configurationFunc(), platformFunc())
                 projectObj.GetProperty(ProjectFileConstants.ProjectGuid).EvaluatedValue
 
           member this.ProjectProvider = None
@@ -612,7 +612,7 @@ module internal Salsa =
                  versionFile,
                  otherFlags:string,
                  otherProjMisc:string,
-                 targetFrameworkVersion:string) =
+                 _:string) =
 
             // Determine which FSharp.targets file to use. If we use the installed
             // targets file then we check the registry for F#'s install path. Otherwise
@@ -713,7 +713,7 @@ module internal Salsa =
                     File.WriteAllText(projectName,text+"\r\n")
 
                 member x.InitializeProjectHook op = openProject <- Some(op:?>IOpenProject)
-                member x.MakeHierarchyHook (projdir, fullname, projectname, configChangeNotifier, serviceProvider) = 
+                member x.MakeHierarchyHook (projdir, fullname, projectname, _, _) = 
                     let projectSite = NewMSBuildProjectSite(Conf, Plat, fullname)
                     let projectSiteFactory = { new IProvideProjectSite with member x.GetProjectSite() = (projectSite :> IProjectSite) }
                     let hier = VsMocks.createHier(projectSiteFactory)
@@ -722,7 +722,7 @@ module internal Salsa =
                 member x.AddFileToHierarchyHook(filename, hier)  = 
                     let itemid = nextItemId()
                     VsMocks.addRootChild hier itemid filename
-                member x.BuildHook (baseName, target, outputWindowPane) = MSBuild.Build(baseName, (if target = null then "Build" else target), Conf(), Plat())
+                member x.BuildHook (baseName, target, _) = MSBuild.Build(baseName, (if target = null then "Build" else target), Conf(), Plat())
                 member x.GetMainOutputAssemblyHook baseName = MSBuild.GetMainOutputAssembly(baseName, Conf(), Plat())
                 member x.SaveHook() = ()
                 member x.DestroyHook() = ()
@@ -891,7 +891,7 @@ module internal Salsa =
             member solution.CleanUp() = 
                 curProjects |> List.iter (fun (_,p) -> p.CleanUp())
                 prevProjects |> Map.toList |> List.iter (fun (_,p) -> p.CleanUp())
-            member solution.OpenExistingProject behaviorHooks projdir projectname =
+            member solution.OpenExistingProject _ projdir projectname =
                 let fullname = Path.Combine(projdir,projectname+".fsproj")
                 match prevProjects.TryFind fullname with
                 | Some(p) -> prevProjects <- prevProjects.Remove fullname
@@ -1067,7 +1067,7 @@ module internal Salsa =
                         let source = Source.CreateSourceTestable_DEPRECATED(file.RecolorizeWholeFile,file.RecolorizeLine,(fun () -> filename),file.IsClosed,project.Solution.Vs.FileChangeEx, solution.Vs.LanguageService :> IDependencyFileChangeNotify_DEPRECATED)
                         let _,buf = view.GetBuffer()
                         solution.Vs.AddSourceForBuffer(buf,source)                 
-                        let source = solution.Vs.LanguageService.CreateSource_DEPRECATED(buf)
+                        let _ = solution.Vs.LanguageService.CreateSource_DEPRECATED(buf)
                         
                         // Scan all lines with the colorizer
                         let tcs:IVsTextColorState = downcast box(buf)
@@ -1092,7 +1092,7 @@ module internal Salsa =
             interface File
             member file.DeleteFileFromDisk() =
                 File.Delete(filename)
-        and internal SimpleOpenFile(project:SimpleOpenProject,filename:string,lines:string array,view:IVsTextView,scanlines:int[],rdtId) = 
+        and internal SimpleOpenFile(project:SimpleOpenProject,filename:string,lines:string array,view:IVsTextView,scanlines:int[],_rdtId) = 
             let mutable lines  = lines
             let mutable scanlines = scanlines
             let mutable cursor:Point = {line=1;col=1}
@@ -1146,7 +1146,7 @@ module internal Salsa =
             member file.OnIdleTypeCheck() = 
                 // Remove errors for this file only
                 project.Errors <- project.Errors |> List.filter(fun err->err.Path <> file.Filename)
-                let ls = project.Solution.Vs.LanguageService
+                let _ = project.Solution.Vs.LanguageService
                 
                 // Full check.                    
                 let sink = new AuthoringSink(BackgroundRequestReason.FullTypeCheck, 0, 0, maxErrors) 
@@ -1217,7 +1217,6 @@ module internal Salsa =
 
             member file.GetQuickInfoAndSpanAtCursor () = 
                 let currentAuthoringScope = file.DoIntellisenseRequest BackgroundRequestReason.QuickInfo
-                let textspan = new TextSpan ()
                 let result,textspan = currentAuthoringScope.GetDataTipText (cursor.line - 1, cursor.col - 1)
                 let currentLineLength = lines.[cursor.line-1].Length
                 // The new editor is less tolerant of values out of range. Enforce rigor in unittests here.
@@ -1309,7 +1308,7 @@ module internal Salsa =
             member file.GetSquiggleAtCursor() =
                 match file.GetSquigglesAtCursor() with
                 | [] -> None
-                | h::t -> Some h  // arbitrarily pick one
+                | h::_ -> Some h  // arbitrarily pick one
             member file.AutoCompleteAtCursorImpl(reason, ?filterText) =
                 let filterText = defaultArg filterText ""
                 let currentAuthoringScope = file.DoIntellisenseRequest(reason)
@@ -1342,7 +1341,7 @@ module internal Salsa =
                     let (index, uniqueMatch, prefixMatch) = declarations.GetBestMatch(filterText, text)
                     Some (declarations.GetName(filterText,index), uniqueMatch, prefixMatch)
             
-            member file.GotoDefinitionAtCursor (forceGen : bool) =
+            member file.GotoDefinitionAtCursor (_ : bool) =
               file.EnsureInitiallyFocusedInVs ()
               let row = cursor.line - 1
               let col = cursor.col - 1

@@ -43,20 +43,20 @@ type AsyncType() =
                 return result
             }
 
-        let onSuccess x   =
+        let onSuccess _   =
             match !whatToDo with
             | Cancel | Throw  
                 -> Assert.Fail("Expected onSuccess but whatToDo was not Exit", [| whatToDo |])
             | Exit
                 -> ()
 
-        let onException x =
+        let onException _ =
             match !whatToDo with
             | Exit | Cancel
                 -> Assert.Fail("Expected onException but whatToDo was not Throw", [| whatToDo |])
             | Throw  -> ()
 
-        let onCancel x    =
+        let onCancel _    =
             match !whatToDo with
             | Exit | Throw
                 -> Assert.Fail("Expected onCancel but whatToDo was not Cancel", [| whatToDo |])
@@ -78,7 +78,7 @@ type AsyncType() =
     member this.AsyncRunSynchronouslyReusesThreadPoolThread() =
         let action = async { async { () } |> Async.RunSynchronously }
         let computation =
-            [| for i in 1 .. 1000 -> action |]
+            [| for _ in 1 .. 1000 -> action |]
             |> Async.Parallel
         // This test needs approximately 1000 ThreadPool threads
         // if Async.RunSynchronously doesn't reuse them.
@@ -211,7 +211,7 @@ type AsyncType() =
             this.WaitASec t
         with :? AggregateException as a ->
             match a.InnerException with
-            | :? TaskCanceledException as t -> ()
+            | :? TaskCanceledException -> ()
             | _ -> reraise()
         Assert.True (t.IsCompleted, "Task is not completed")
 
@@ -253,7 +253,7 @@ type AsyncType() =
         try
             Async.RunSynchronously(a, cancellationToken = cts.Token)
                 |> ignore
-        with :? OperationCanceledException as o -> ()
+        with :? OperationCanceledException -> ()
 
     [<Fact>]
     member this.ExceptionPropagatesToTask () =
@@ -298,7 +298,7 @@ type AsyncType() =
         let ewh = new ManualResetEvent(false)
         let cancelled = ref false
         let a = async { 
-                use! holder = Async.OnCancel (fun _ -> cancelled := true)
+                use! __ = Async.OnCancel (fun _ -> cancelled := true)
                 ewh.Set() |> Assert.True
                 while true do ()
             }
@@ -471,9 +471,9 @@ type AsyncType() =
             Task.Factory.StartNew(Func<unit>(fun () -> raise <| Exception()))
         let a = async {
                 try
-                    let! v = Async.AwaitTask(t)
+                    let! _ = Async.AwaitTask(t)
                     return false
-                with e -> return true
+                with _ -> return true
               }
         Async.RunSynchronously(a, 1000) |> Assert.True  
         
@@ -488,7 +488,6 @@ type AsyncType() =
         use t : Task<unit>=
 #endif 
           Task.Factory.StartNew(Func<unit>(fun () -> while not token.IsCancellationRequested do ()), token)
-        let cancelled = ref true
         let a = async {
                     use! _holder = Async.OnCancel(fun _ -> ewh.Set() |> ignore)
                     let! v = Async.AwaitTask(t)
@@ -524,9 +523,9 @@ type AsyncType() =
             Task.Factory.StartNew(Action(fun () -> raise <| Exception()))
         let a = async {
                 try
-                    let! v = Async.AwaitTask(t)
+                    let! _ = Async.AwaitTask(t)
                     return false
-                with e -> return true
+                with _ -> return true
               }
         Async.RunSynchronously(a, 3000) |> Assert.True  
         
